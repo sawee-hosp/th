@@ -1,34 +1,45 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thalassemia Screening Unit - Thammasat Hospital</title>
+    <title>Thalassemia Unit - TU Hospital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- เพิ่ม defer เพื่อให้ Alpine.js โหลดหลังจากที่สคริปต์ด้านล่างถูกประมวลผลแล้ว -->
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- pdfmake libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Sarabun', sans-serif; }
-        .bg-blood {
-            background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('https://poonnaphop.github.io/thalass/#/img/blood3.jpg');
+        .bg-app {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('https://poonnaphop.github.io/thalass/static/media/blood3.8b03985a0be9bac11946.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
         [x-cloak] { display: none !important; }
-        .no-print { display: flex; }
-        @media print {
-            .no-print { display: none !important; }
-            .bg-blood { background-image: none !important; background-color: white !important; }
+
+        /* Floating Label Styles */
+        .floating-input:focus-within label,
+        .floating-input input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+            background-color: white;
+            padding: 0 0.4rem;
+            color: #1e88e5;
         }
-        /* Loading Spinner */
+        .floating-input label {
+            transition: all 0.2s ease-out;
+            pointer-events: none;
+        }
+        input::placeholder { color: transparent; }
+        
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 3px solid #fff;
-            width: 18px;
-            height: 18px;
+            border-top: 2px solid #fff;
+            width: 1rem;
+            height: 1rem;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
@@ -36,313 +47,416 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-</head>
-<body class="bg-blood min-h-screen" x-data="thalassemiaApp" x-cloak>
-
-    <!-- Header -->
-    <header class="bg-[#1e88e5] text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-50 no-print" x-show="view !== 'login'">
-        <div class="flex items-center gap-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            <h1 class="text-xl font-bold">Thalassemia Unit</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
-                </div>
-                <span class="hidden sm:inline">Admin</span>
-            </div>
-            <button @click="view = 'login'" class="hover:text-red-200"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
-        </div>
-    </header>
-
-    <!-- Login View -->
-    <div x-show="view === 'login'" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white/95 p-10 rounded-lg shadow-2xl w-full max-w-md text-center border-t-4 border-blue-600">
-            <div class="bg-purple-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-white">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-700 mb-6">Sign in</h1>
-            <div class="space-y-4 mb-8">
-                <input type="text" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ID (admin)">
-                <input type="password" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Password">
-            </div>
-            <button @click="view = 'menu'" class="w-full bg-[#1e88e5] text-white p-3 rounded font-bold hover:bg-blue-700 shadow-md uppercase">SIGN IN</button>
-        </div>
-    </div>
-
-    <!-- Menu View -->
-    <div x-show="view === 'menu'" class="max-w-4xl mx-auto mt-20 p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <button @click="testType = 'typing'; view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition flex flex-col items-center gap-6 group border-b-4 border-transparent hover:border-blue-500">
-            <div class="p-6 bg-blue-50 rounded-full group-hover:scale-110 transition text-blue-600">
-                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            </div>
-            <span class="text-2xl font-bold text-gray-700">HB TYPING</span>
-        </button>
-        <button @click="testType = 'dna'; view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition flex flex-col items-center gap-6 group border-b-4 border-transparent hover:border-blue-500">
-            <div class="p-6 bg-blue-50 rounded-full group-hover:scale-110 transition text-blue-600">
-                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-            </div>
-            <span class="text-2xl font-bold text-gray-700 uppercase">Alpha & Beta Test</span>
-        </button>
-    </div>
-
-    <!-- Content Area -->
-    <div x-show="['info', 'lab', 'result'].includes(view)" class="max-w-6xl mx-auto mt-8 px-4 pb-20">
-        
-        <!-- Hospital Header -->
-        <div class="bg-white p-4 mb-6 rounded shadow border-l-4 border-blue-600 flex justify-between items-center no-print">
-           <div class="font-bold text-blue-800">ศูนย์พัฒนาสู่ความเป็นเลิศการคัดกรองและวินิจฉัยก่อนคลอด รพ.ธรรมศาสตร์ฯ</div>
-           <div class="text-sm text-gray-500" x-text="'วันที่: ' + new Date().toLocaleDateString('th-TH')"></div>
-        </div>
-
-        <!-- Section 1: Info -->
-        <div x-show="view === 'info'" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded shadow border">
-                    <h3 class="text-lg font-bold border-b pb-2 mb-4 text-blue-700">ภรรยา (Wife)</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input x-model="formData.wife.name" class="border p-2 rounded" placeholder="ชื่อ">
-                        <input x-model="formData.wife.surname" class="border p-2 rounded" placeholder="นามสกุล">
-                        <input x-model="formData.wife.age" class="border p-2 rounded" placeholder="อายุ (ปี)">
-                        <input x-model="formData.wife.hn" class="border p-2 rounded" placeholder="HN">
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded shadow border">
-                    <h3 class="text-lg font-bold border-b pb-2 mb-4 text-blue-700">สามี (Husband)</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input x-model="formData.husband.name" class="border p-2 rounded" placeholder="ชื่อ">
-                        <input x-model="formData.husband.surname" class="border p-2 rounded" placeholder="นามสกุล">
-                        <input x-model="formData.husband.age" class="border p-2 rounded" placeholder="อายุ (ปี)">
-                        <input x-model="formData.husband.hn" class="border p-2 rounded" placeholder="HN">
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded shadow border">
-                <h3 class="text-lg font-bold border-b pb-2 mb-4 text-blue-700">ข้อมูลการตั้งครรภ์</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <input x-model="formData.pregnancy.gravid" class="border p-2 rounded" placeholder="Gravid">
-                    <input x-model="formData.pregnancy.para" class="border p-2 rounded" placeholder="Para">
-                    <input x-model="formData.pregnancy.abortion" class="border p-2 rounded" placeholder="Abortion">
-                    <input x-model="formData.pregnancy.living" class="border p-2 rounded" placeholder="Living">
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex items-center gap-4">
-                        <span>ส่งมารับคำปรึกษาจาก:</span>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input type="radio" value="รพธ." x-model="formData.pregnancy.hospital"> รพธ.
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input type="radio" value="อื่นๆ" x-model="formData.pregnancy.hospital"> อื่นๆ
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-end gap-4 mt-8 no-print">
-                <button @click="view = 'menu'" class="bg-gray-100 px-8 py-2 rounded">BACK</button>
-                <button @click="view = 'lab'" class="bg-blue-600 text-white px-10 py-2 rounded font-bold">NEXT</button>
-            </div>
-        </div>
-
-        <!-- Section 2: Lab Results -->
-        <div x-show="view === 'lab'" class="space-y-6">
-            <template x-if="testType === 'typing'">
-                <div class="bg-white rounded shadow border overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[600px]">
-                        <thead class="bg-gray-50 border-b">
-                            <tr><th class="p-3 border-r">รายการตรวจ</th><th class="p-3 border-r text-center">ภรรยา</th><th class="p-3 text-center">สามี</th></tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="item in labItems" :key="item">
-                                <tr class="border-b">
-                                    <td class="p-3 bg-gray-50 font-medium border-r" x-text="item"></td>
-                                    <td class="p-2 border-r"><input type="text" class="w-full p-1 text-center outline-none focus:bg-blue-50" x-model="formData.lab_wife[item]"></td>
-                                    <td class="p-2"><input type="text" class="w-full p-1 text-center outline-none focus:bg-blue-50" x-model="formData.lab_husband[item]"></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-
-            <template x-if="testType === 'dna'">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <template x-for="person in ['wife', 'husband']" :key="person">
-                        <div class="bg-white p-6 rounded shadow border">
-                            <h3 class="font-bold text-blue-700 mb-4 border-b pb-2 uppercase" x-text="(person === 'wife' ? 'Mom' : 'Dad') + ' - DNA Result'"></h3>
-                            <div class="mb-6">
-                                <p class="font-semibold text-gray-700 mb-2">Alpha Thalassemia</p>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <template x-for="dna in alphaOptions" :key="dna">
-                                        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded border text-xs cursor-pointer hover:bg-blue-50">
-                                            <input type="checkbox" :value="dna" x-model="formData['pcr_' + person].alpha">
-                                            <span x-text="dna"></span>
-                                        </label>
-                                    </template>
-                                </div>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-700 mb-2">Beta Thalassemia</p>
-                                <div class="space-y-2">
-                                    <template x-for="dna in betaOptions" :key="dna">
-                                        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded border text-sm cursor-pointer hover:bg-blue-50">
-                                            <input type="checkbox" :value="dna" x-model="formData['pcr_' + person].beta">
-                                            <span x-text="dna"></span>
-                                        </label>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </template>
-
-            <div class="flex justify-between mt-10 no-print">
-                <button @click="view = 'info'" class="bg-gray-100 px-8 py-2 rounded">BACK</button>
-                <button @click="interpretResult()" class="bg-[#1e88e5] text-white px-12 py-2 rounded font-bold shadow-md">SUBMIT</button>
-            </div>
-        </div>
-
-        <!-- Section 3: Result Summary -->
-        <div x-show="view === 'result' && result" class="max-w-4xl mx-auto space-y-6">
-            <div class="bg-white rounded shadow-xl overflow-hidden border">
-                <div :class="result.severity === 'high' ? 'bg-red-600' : 'bg-green-600'" class="p-4 text-white font-bold flex items-center gap-2">
-                    <span x-text="result.severity === 'high' ? '⚠️ ผลการประเมิน: พบความเสี่ยง' : '✅ ผลการประเมิน: ปกติ/เสี่ยงต่ำ'"></span>
-                </div>
-                <div class="p-8">
-                    <div class="mb-6 pb-6 border-b">
-                        <h4 class="text-gray-400 font-bold uppercase text-xs mb-1">Interpretation</h4>
-                        <p :class="result.severity === 'high' ? 'text-red-600' : 'text-green-600'" class="text-2xl font-bold" x-text="result.risk"></p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <h5 class="font-bold text-gray-700 mb-2">ข้อมูลคู่สมรส</h5>
-                            <p class="text-gray-600">ภรรยา: <span x-text="formData.wife.name + ' ' + formData.wife.surname"></span></p>
-                            <p class="text-gray-600">สามี: <span x-text="formData.husband.name + ' ' + formData.husband.surname"></span></p>
-                        </div>
-                        <div>
-                            <h5 class="font-bold text-gray-700 mb-2">คำแนะนำ</h5>
-                            <ul class="list-disc list-inside text-gray-600 space-y-2">
-                                <template x-for="(rec, index) in result.recommendations" :key="index">
-                                    <li x-text="rec"></li>
-                                </template>
-                                <li x-show="result.recommendations.length === 0">ไม่พบความเสี่ยงต่อโรครุนแรง 3 ชนิดหลัก</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="flex gap-4 justify-end no-print">
-                        <button @click="window.print()" class="px-6 py-2 border rounded hover:bg-gray-50">PRINT</button>
-                        <button @click="saveData()" :disabled="isSaving" class="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 disabled:bg-blue-300 flex items-center gap-2">
-                            <template x-if="isSaving">
-                                <div class="spinner"></div>
-                            </template>
-                            <span x-text="isSaving ? 'SAVING...' : 'SAVE TO CLOUD'"></span>
-                        </button>
-                        <button @click="resetApp()" class="px-6 py-2 bg-gray-800 text-white rounded hover:bg-black">NEW CASE</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
-        // ตรวจสอบให้แน่ใจว่าได้ลงทะเบียน Alpine component ก่อนที่ Alpine จะเริ่มทำงาน
         document.addEventListener('alpine:init', () => {
             Alpine.data('thalassemiaApp', () => ({
                 view: 'login',
                 testType: null,
                 isSaving: false,
                 gasUrl: 'https://script.google.com/macros/s/AKfycbztfpOWvoOGncQEaGO7Nnlprvs9F6Mg4ALypTcAqEBjy4i2vkeOnbZD-jIi5nW5M95_/exec',
-                labItems: ['MCV', 'MCH', 'Hb A', 'OF', 'Hb F', 'Hb Cs', 'Hb Bart', 'DCIP', 'Hb H', 'A2', 'Hb A2 + E', 'Hb E'],
-                alphaOptions: ['SEA', 'THAI', 'FIL', 'MED', '-20.5kb', 'Pakse', 'PNP', '-4.2kb', '-3.7kb'],
-                betaOptions: ['Negative', 'Positive for GAP-PCR', 'HBE'],
+                thalTypes: ["Normal", "Alpha-thal 1 trait", "Alpha-thal 2 trait", "Beta-thal trait", "Hb E trait", "Homozygous Hb E", "Beta-thal / Hb E", "Hb H disease", "Hb H with CS", "Hb CS trait", "Homozygous CS", "EA with Alpha-thal 1", "EE with Alpha-thal 1", "Beta-thal Major", "Delta-Beta Trait", "Alpha-1 / Beta-thal Trait", "Homozygous Beta", "Hb Bart's Hydrops", "AE Bart's Disease", "EF Bart's Disease", "Hb Hope / Variants", "HPFH"],
+                labItems: ['MCV', 'MCH', 'Hb A', 'Hb A2', 'Hb F', 'Hb Cs', 'Hb Bart\'s', 'Hb H'],
                 formData: {
                     wife: { name: '', surname: '', age: '', hn: '' },
                     husband: { name: '', surname: '', age: '', hn: '' },
-                    pregnancy: { gravid: '', para: '', abortion: '', living: '', hospital: 'รพธ.' },
-                    lab_wife: {}, 
-                    lab_husband: {},
-                    pcr_wife: { alpha: [], beta: [] }, 
-                    pcr_husband: { alpha: [], beta: [] }
+                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '', ga_weeks: '', ga_days: '', hospital: 'รพธ.', history: '' }
                 },
-                result: null,
+                labData: {
+                    wife: { knowOrder: false, orderType: '', dcip: '', of: '', hbeLogic: 'none', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbarts: '', hbh: '', hba2e: '', hba2_sep: '', hbe_sep: '' },
+                    husband: { knowOrder: false, orderType: '', dcip: '', of: '', hbeLogic: 'none', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbarts: '', hbh: '', hba2e: '', hba2_sep: '', hbe_sep: '' }
+                },
+                // กำหนดโครงสร้างเริ่มต้นของ result เพื่อป้องกัน TypeError
+                result: {
+                    consultant: '',
+                    wifeType: '',
+                    husbandType: '',
+                    riskText: '',
+                    recommendation: '',
+                    appointmentDate: '',
+                    appWeeks: '',
+                    appDays: '',
+                    remarks: '',
+                    ready: false // ใช้เช็กว่าประมวลผลเสร็จหรือยัง
+                },
 
                 init() {
-                    // กำหนดค่าเริ่มต้นให้กับออบเจ็กต์ lab เพื่อป้องกันความผิดพลาดของ x-model
-                    this.labItems.forEach(item => {
-                        this.formData.lab_wife[item] = '';
-                        this.formData.lab_husband[item] = '';
+                    ['wife', 'husband'].forEach(p => {
+                        this.labItems.forEach(item => {
+                            const key = item.toLowerCase().replace("'", "").replace(" ", "");
+                            if(!this.labData[p][key]) this.labData[p][key] = '';
+                        });
                     });
                 },
 
-                interpretResult() {
-                    let risk = "ไม่ใช่คู่เสี่ยงธาลัสซีเมียชนิดรุนแรง";
-                    let severity = "low";
-                    let recommendations = [];
-
-                    const alpha1Set = ['SEA', 'THAI', 'FIL', 'MED', '-20.5kb'];
-                    const wAlpha1 = this.formData.pcr_wife.alpha.some(v => alpha1Set.includes(v));
-                    const hAlpha1 = this.formData.pcr_husband.alpha.some(v => alpha1Set.includes(v));
+                generateResult() {
+                    const wType = this.labData.wife.knowOrder ? this.thalTypes[this.labData.wife.orderType-1] : "Normal (Calculated)";
+                    const hType = this.labData.husband.knowOrder ? this.thalTypes[this.labData.husband.orderType-1] : "Normal (Calculated)";
                     
-                    const wA2 = parseFloat(this.formData.lab_wife['A2']) || 0;
-                    const hA2 = parseFloat(this.formData.lab_husband['A2']) || 0;
-                    const wBetaPCR = this.formData.pcr_wife.beta.includes('Positive for GAP-PCR');
-                    const hBetaPCR = this.formData.pcr_husband.beta.includes('Positive for GAP-PCR');
-                    
-                    const wHbE = (parseFloat(this.formData.lab_wife['Hb E']) > 25) || this.formData.pcr_wife.beta.includes('HBE');
-                    const hHbE = (parseFloat(this.formData.lab_husband['Hb E']) > 25) || this.formData.pcr_husband.beta.includes('HBE');
-
-                    if (wAlpha1 && hAlpha1) {
-                        risk = "คู่เสี่ยงธาลัสซีเมียชนิดรุนแรง Hb Bart's Hydrops Fetalis";
-                        severity = "high";
-                        recommendations.push("จำเป็นต้องตรวจยืนยันด้วย PCR for Alpha-1 ทั้งคู่");
-                    } else if ((wA2 > 3.5 || wBetaPCR) && (hA2 > 3.5 || hBetaPCR)) {
-                        risk = "คู่เสี่ยงธาลัสซีเมียชนิดรุนแรง Homozygous Beta-thalassemia";
-                        severity = "high";
-                        recommendations.push("แนะนำให้ตรวจ DNA Mutation เพื่อระบุชนิดยีน");
-                    } else if (((wA2 > 3.5 || wBetaPCR) && hHbE) || ((hA2 > 3.5 || hBetaPCR) && wHbE)) {
-                        risk = "คู่เสี่ยงธาลัสซีเมียชนิดรุนแรง Beta-thalassemia / Hb E";
-                        severity = "high";
-                        recommendations.push("คู่สมรสเสี่ยงต่อการมีบุตรเป็นโรคซีดปานกลาง-รุนแรง");
-                    }
-
-                    this.result = { risk, severity, recommendations };
+                    this.result = {
+                        consultant: '',
+                        wifeType: wType,
+                        husbandType: hType,
+                        riskText: "-มีความเสี่ยงต้องส่งเลือดตรวจวิเคราะห์ระดับ DNA ส่งตรวจ: คู่สมรสควรตรวจ Alpha, beta",
+                        recommendation: "จำเป็นต้องตรวจ PCR for Alpha ทั้งคู่ และ PCR for Beta ทั้งคู่",
+                        appointmentDate: '',
+                        appWeeks: '',
+                        appDays: '',
+                        remarks: '',
+                        ready: true
+                    };
                     this.view = 'result';
                 },
 
-                async saveData() {
+                async saveToGAS() {
+                    if (!this.result.ready) return;
                     this.isSaving = true;
-                    const payload = {
-                        wife: this.formData.wife.name + ' ' + this.formData.wife.surname,
-                        husband: this.formData.husband.name + ' ' + this.formData.husband.surname,
-                        risk: this.result.risk,
-                        timestamp: new Date().toISOString()
-                    };
-
                     try {
+                        const payload = {
+                            wife: this.formData.wife,
+                            husband: this.formData.husband,
+                            pregnancy: this.formData.pregnancy,
+                            result: this.result,
+                            timestamp: new Date().toISOString()
+                        };
                         await fetch(this.gasUrl, {
                             method: 'POST',
                             mode: 'no-cors',
-                            cache: 'no-cache',
-                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
                         });
-                        alert('ส่งข้อมูลไปยังระบบ Cloud สำเร็จ');
-                    } catch (error) {
-                        console.error('Submission error:', error);
-                        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบการเชื่อมต่อ');
+                        alert('Data saved to Cloud Successfully');
+                    } catch (e) {
+                        alert('Error saving data');
                     } finally {
                         this.isSaving = false;
                     }
                 },
 
+                printPDF() {
+                    if (!this.result.ready) return;
+                    const dd = {
+                        content: [
+                            { text: 'ศูนย์พัฒนาสู่ความเป็นเลิศการคัดกรองและวินิจฉัยก่อนคลอด', style: 'header', alignment: 'center' },
+                            { text: 'โรคโลหิตจางธาลัสซีเมีย โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ', style: 'header', alignment: 'center' },
+                            { text: '\n' },
+                            { text: 'แบบบันทึกการให้คำปรึกษาแก่คู่สมรสที่มีความเสี่ยงต่อการมีบุตรเป็นโรคธาลัสซีเมีย', alignment: 'center', bold: true },
+                            { text: `วันที่ ${new Date().toLocaleDateString('th-TH')}\n\n`, alignment: 'right' },
+                            {
+                                table: {
+                                    widths: ['*', '*', '*'],
+                                    body: [
+                                        [
+                                            { text: `ภรรยา\nชื่อ-สกุล: ${this.formData.wife.name} ${this.formData.wife.surname}\nอายุ: ${this.formData.wife.age} ปี\nHN: ${this.formData.wife.hn}` },
+                                            { text: `สามี\nชื่อ-สกุล: ${this.formData.husband.name} ${this.formData.husband.surname}\nอายุ: ${this.formData.husband.age} ปี\nHN: ${this.formData.husband.hn}` },
+                                            { text: `Gravid: ${this.formData.pregnancy.gravid} Para: ${this.formData.pregnancy.para}\nAbortion: ${this.formData.pregnancy.abortion} Living: ${this.formData.pregnancy.living}\nEDC: ${this.formData.pregnancy.edc}\nGA: ${this.formData.pregnancy.ga_weeks} week ${this.formData.pregnancy.ga_days} day\nรพ: ${this.formData.pregnancy.hospital}` }
+                                        ]
+                                    ]
+                                }
+                            },
+                            { text: '\nสรุปผลการประเมินความเสี่ยง', bold: true, fontSize: 14 },
+                            { text: `Interpretation: ${this.result.riskText}` },
+                            { text: `\nคำแนะนำ: ${this.result.recommendation}` },
+                            { text: '\nผลตรวจคัดกรองมารดา:', bold: true },
+                            { text: `Type: ${this.result.wifeType}` },
+                            { text: '\nผลตรวจคัดกรองสามี:', bold: true },
+                            { text: `Type: ${this.result.husbandType}` },
+                            { text: '\nรายงานผล Hb typing (2.1-2.2 ตามเกณฑ์): มีความเสี่ยง' },
+                            { text: '\n\nลงนาม ................................................................ แพทย์/พยาบาลผู้ให้คำปรึกษา', alignment: 'right' },
+                            { text: `(${this.result.consultant || '................................'})`, alignment: 'right', margin: [0, 5, 40, 0] }
+                        ],
+                        styles: {
+                            header: { fontSize: 16, bold: true }
+                        },
+                        defaultStyle: { font: 'Sarabun' }
+                    };
+                    pdfMake.createPdf(dd).download('Thalassemia_Consult_Record.pdf');
+                },
+
                 resetApp() {
-                    if(confirm('ต้องการเริ่มรายการใหม่หรือไม่? ข้อมูลที่ยังไม่ได้บันทึกจะหายไป')) {
-                        location.reload();
-                    }
+                    location.reload();
                 }
             }));
         });
     </script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-app min-h-screen" x-data="thalassemiaApp" x-cloak>
+
+    <!-- Navigation Header -->
+    <nav class="bg-[#1e88e5] text-white shadow-lg sticky top-0 z-50 px-4 py-3 flex justify-between items-center no-print" x-show="view !== 'login'">
+        <div class="flex items-center gap-3 font-semibold text-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <span>Thalassemia Unit</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div @click="resetApp()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE 1: Login -->
+    <div x-show="view === 'login'" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm text-center border-t-8 border-purple-600">
+            <div class="bg-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold mb-6">Sign in</h2>
+            <div class="space-y-4 mb-6">
+                <input type="text" class="w-full p-3 border-b-2 border-gray-200 outline-none focus:border-purple-600" placeholder="admin">
+                <input type="password" class="w-full p-3 border-b-2 border-gray-200 outline-none focus:border-purple-600" placeholder="•••••">
+            </div>
+            <button @click="view = 'menu'" class="w-full bg-[#1e88e5] text-white py-2 rounded shadow-md font-bold uppercase hover:bg-blue-700 transition">SIGN IN</button>
+        </div>
+    </div>
+
+    <!-- PAGE 2: Menu Selection -->
+    <div x-show="view === 'menu'" class="max-w-4xl mx-auto mt-20 p-6 flex flex-col md:flex-row gap-10 justify-center">
+        <button @click="testType = 'typing'; view = 'info'" class="bg-white/90 p-12 rounded-lg shadow-xl hover:bg-white transition flex-1 flex flex-col items-center gap-4 group">
+            <div class="p-6 bg-blue-50 rounded-full group-hover:bg-blue-100 transition">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            </div>
+            <span class="text-2xl font-bold text-gray-700">HB TYPING</span>
+        </button>
+        <button @click="testType = 'dna'; view = 'info'" class="bg-white/90 p-12 rounded-lg shadow-xl hover:bg-white transition flex-1 flex flex-col items-center gap-4 group">
+            <div class="p-6 bg-blue-50 rounded-full group-hover:bg-blue-100 transition">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            </div>
+            <span class="text-xl font-bold text-gray-700 uppercase">Alpha & Beta Test</span>
+        </button>
+    </div>
+
+    <!-- PAGE 3: General Information -->
+    <div x-show="view === 'info'" class="max-w-6xl mx-auto p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Wife Section -->
+            <div class="bg-white p-6 rounded shadow border">
+                <h3 class="text-lg font-bold text-blue-600 border-b pb-2 mb-6">Wife</h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.wife.name" id="w_name" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Name">
+                        <label for="w_name" class="absolute left-3 top-4 text-gray-400 text-sm">Name</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.wife.surname" id="w_surname" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Surname">
+                        <label for="w_surname" class="absolute left-3 top-4 text-gray-400 text-sm">Surname</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="number" x-model="formData.wife.age" id="w_age" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Age">
+                        <label for="w_age" class="absolute left-3 top-4 text-gray-400 text-sm">Age (years old)</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.wife.hn" id="w_hn" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="HN">
+                        <label for="w_hn" class="absolute left-3 top-4 text-gray-400 text-sm">HN</label>
+                    </div>
+                </div>
+            </div>
+            <!-- Husband Section -->
+            <div class="bg-white p-6 rounded shadow border">
+                <h3 class="text-lg font-bold text-blue-600 border-b pb-2 mb-6">Husband</h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.husband.name" id="h_name" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Name">
+                        <label for="h_name" class="absolute left-3 top-4 text-gray-400 text-sm">Name</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.husband.surname" id="h_surname" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Surname">
+                        <label for="h_surname" class="absolute left-3 top-4 text-gray-400 text-sm">Surname</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="number" x-model="formData.husband.age" id="h_age" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="Age">
+                        <label for="h_age" class="absolute left-3 top-4 text-gray-400 text-sm">Age (years old)</label>
+                    </div>
+                    <div class="relative floating-input">
+                        <input type="text" x-model="formData.husband.hn" id="h_hn" class="w-full border-2 rounded p-3 pt-4 outline-none focus:border-blue-600" placeholder="HN">
+                        <label for="h_hn" class="absolute left-3 top-4 text-gray-400 text-sm">HN</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pregnancy Section -->
+        <div class="bg-white p-6 rounded shadow border">
+            <h3 class="text-lg font-bold text-blue-600 border-b pb-2 mb-6">Pregnancy Information</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                <input type="text" x-model="formData.pregnancy.gravid" class="border-2 p-3 rounded" placeholder="Gravid">
+                <input type="text" x-model="formData.pregnancy.para" class="border-2 p-3 rounded" placeholder="Para">
+                <input type="text" x-model="formData.pregnancy.abortion" class="border-2 p-3 rounded" placeholder="Abortion">
+                <input type="text" x-model="formData.pregnancy.living" class="border-2 p-3 rounded" placeholder="Living">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex items-center gap-2">
+                    <span>EDC:</span>
+                    <input type="date" x-model="formData.pregnancy.edc" class="border-2 p-2 rounded flex-1">
+                </div>
+                <div class="flex items-center gap-2">
+                    <span>GA:</span>
+                    <input type="number" x-model="formData.pregnancy.ga_weeks" class="border-2 p-2 w-20 rounded"> <span>weeks</span>
+                    <input type="number" x-model="formData.pregnancy.ga_days" class="border-2 p-2 w-20 rounded"> <span>days</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span>Hospital:</span>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="radio" value="รพธ." x-model="formData.pregnancy.hospital"> รพธ.</label>
+                    <label class="flex items-center gap-1 cursor-pointer"><input type="radio" value="อื่นๆ" x-model="formData.pregnancy.hospital"> อื่นๆ</label>
+                </div>
+            </div>
+            <div class="mt-6">
+                <textarea x-model="formData.pregnancy.history" class="w-full border-2 p-3 rounded outline-none focus:border-blue-600" rows="3" placeholder="ประวัติเพิ่มเติม..."></textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 no-print">
+            <button @click="view = 'menu'" class="bg-gray-100 px-8 py-2 rounded font-semibold text-gray-600 hover:bg-gray-200 transition">BACK</button>
+            <button @click="view = 'lab'" class="bg-[#1e88e5] text-white px-10 py-2 rounded shadow font-bold hover:bg-blue-700 transition">NEXT</button>
+        </div>
+    </div>
+
+    <!-- PAGE 4: Lab Results -->
+    <div x-show="view === 'lab'" class="max-w-6xl mx-auto p-6 pb-20">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <template x-for="person in ['wife', 'husband']" :key="person">
+                <div class="bg-white p-6 rounded shadow border">
+                    <h3 class="text-lg font-bold text-blue-800 border-b pb-2 mb-4 uppercase" x-text="person === 'wife' ? 'Mom (Mother)' : 'Dad (Father)'"></h3>
+                    
+                    <div class="flex items-center gap-2 mb-4 bg-gray-50 p-2 rounded">
+                        <input type="checkbox" x-model="labData[person].knowOrder" :id="'know_'+person">
+                        <label :for="'know_'+person" class="cursor-pointer">Know <span x-text="person"></span> Order</label>
+                        <select x-show="labData[person].knowOrder" x-model="labData[person].orderType" class="border rounded p-1 ml-2 flex-1 outline-none focus:border-blue-600">
+                            <option value="">-- Choose Type --</option>
+                            <template x-for="(name, index) in thalTypes" :key="index">
+                                <option :value="index+1" x-text="(index+1) + '. ' + name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div class="space-y-4" :class="labData[person].knowOrder ? 'opacity-50 pointer-events-none' : ''">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-sm font-bold">DCIP</span>
+                                <div class="flex gap-4 mt-1">
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'dcip_'+person" value="Positive" x-model="labData[person].dcip"> Pos</label>
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'dcip_'+person" value="Negative" x-model="labData[person].dcip"> Neg</label>
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'dcip_'+person" value="Unknown" x-model="labData[person].dcip"> Unk</label>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold">OF</span>
+                                <div class="flex gap-4 mt-1">
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'of_'+person" value="Positive" x-model="labData[person].of"> Pos</label>
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'of_'+person" value="Negative" x-model="labData[person].of"> Neg</label>
+                                    <label class="cursor-pointer flex items-center gap-1"><input type="radio" :name="'of_'+person" value="Unknown" x-model="labData[person].of"> Unk</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <template x-for="item in labItems" :key="item">
+                            <div class="flex items-center gap-4">
+                                <label class="w-24 text-sm font-medium" x-text="item"></label>
+                                <input type="text" x-model="labData[person][item.toLowerCase().replace('\'', '').replace(' ', '')]" class="flex-1 border-b-2 outline-none focus:border-blue-600 text-center">
+                            </div>
+                        </template>
+
+                        <div class="pt-4 border-t">
+                            <span class="text-sm font-bold">HbE Logic</span>
+                            <div class="space-y-2 mt-2">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" :name="'hbe_logic_'+person" value="combined" x-model="labData[person].hbeLogic"> HbA2 + E</label>
+                                <div x-show="labData[person].hbeLogic === 'combined'" class="pl-6"><input type="text" placeholder="HbA2 + E Value" class="w-full border-b text-center" x-model="labData[person].hba2e"></div>
+                                
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" :name="'hbe_logic_'+person" value="separate" x-model="labData[person].hbeLogic"> Separate HbA2 and E</label>
+                                <div x-show="labData[person].hbeLogic === 'separate'" class="pl-6 flex gap-2">
+                                    <input type="text" placeholder="HbA2 Value" class="border-b text-center w-full" x-model="labData[person].hba2_sep">
+                                    <input type="text" placeholder="E Value" class="border-b text-center w-full" x-model="labData[person].hbe_sep">
+                                </div>
+
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" :name="'hbe_logic_'+person" value="none" x-model="labData[person].hbeLogic"> Don't have Hb E</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="flex justify-between mt-10 no-print">
+            <button @click="view = 'info'" class="bg-gray-100 px-8 py-2 rounded text-gray-600 hover:bg-gray-200 transition">BACK</button>
+            <button @click="generateResult()" class="bg-[#1e88e5] text-white px-12 py-2 rounded shadow-lg font-bold hover:bg-blue-700 transition">SUBMIT</button>
+        </div>
+    </div>
+
+    <!-- PAGE 5: Result Summary -->
+    <template x-if="result && result.ready">
+        <div x-show="view === 'result'" class="max-w-6xl mx-auto p-6 space-y-6">
+            <div class="bg-white p-8 rounded shadow-2xl border">
+                <h1 class="text-2xl font-bold text-center mb-8">ผลการตรวจคัดกรอง HB Typing</h1>
+                
+                <div class="mb-6 flex flex-col md:flex-row gap-4 items-center">
+                    <span class="font-bold">ชื่อ แพทย์/พยาบาลผู้ให้คำปรึกษา:</span>
+                    <input type="text" x-model="result.consultant" class="border-b-2 flex-1 outline-none text-center md:text-left focus:border-blue-600">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-blue-50 p-4 rounded border border-blue-100">
+                        <h4 class="font-bold text-blue-800 mb-2 border-b border-blue-200 pb-1">ผลตรวจคัดกรองมารดา</h4>
+                        <p>ชื่อมารดา: <span x-text="formData.wife.name + ' ' + formData.wife.surname"></span></p>
+                        <p class="mt-2 font-bold text-lg">Type: <span class="text-red-600" x-text="result.wifeType"></span></p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded border border-green-100">
+                        <h4 class="font-bold text-green-800 mb-2 border-b border-green-200 pb-1">ผลตรวจคัดกรองสามี</h4>
+                        <p>ชื่อสามี: <span x-text="formData.husband.name + ' ' + formData.husband.surname"></span></p>
+                        <p class="mt-2 font-bold text-lg">Type: <span class="text-red-600" x-text="result.husbandType"></span></p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 border-t pt-6">
+                    <div>
+                        <h4 class="font-bold text-xl mb-2 underline text-blue-900">การประเมินความเสี่ยง</h4>
+                        <p class="text-lg leading-relaxed" x-text="result.riskText"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1 underline text-blue-800">คำแนะนำ</h4>
+                        <p class="leading-relaxed" x-text="result.recommendation"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded border">
+                        <h4 class="font-bold mb-2 text-gray-700">รายงานผล Hb typing (เกณฑ์ความเสี่ยงรุนแรง)</h4>
+                        <p class="text-sm">2.1 มีความเสี่ยงที่จะเป็นคู่เสี่ยงธาลัสซีเมียชนิดรุนแรง Hb Bart’s hydrop fetalis</p>
+                        <p class="text-sm mt-1">2.2 มีความเสี่ยงที่จะเป็นคู่เสี่ยงธาลัสซีเมียชนิดรุนแรง Homozygous Beta-thalassemia ชนิด β๐/ β๐</p>
+                    </div>
+                </div>
+
+                <div class="mt-10 border-t pt-6">
+                    <h4 class="font-bold text-lg mb-4 underline">นัดหมาย</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-center gap-2">
+                            <span>วันที่นัดหมาย:</span>
+                            <input type="date" x-model="result.appointmentDate" class="border rounded p-1 outline-none focus:border-blue-600">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span>อายุครรภ์:</span>
+                            <input type="number" class="border w-20 p-1 text-center outline-none focus:border-blue-600" x-model="result.appWeeks"> <span class="text-sm">weeks</span>
+                            <input type="number" class="border w-20 p-1 text-center outline-none focus:border-blue-600" x-model="result.appDays"> <span class="text-sm">days</span>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <span class="font-medium">หมายเหตุ:</span>
+                        <textarea class="w-full border p-2 mt-1 rounded outline-none focus:border-blue-600" rows="2" placeholder="Enter Remark Details" x-model="result.remarks"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap justify-end gap-4 mt-12 no-print">
+                    <button @click="saveToGAS()" :disabled="isSaving" class="bg-blue-600 text-white px-8 py-2 rounded font-bold shadow hover:bg-blue-700 disabled:bg-gray-400 transition flex items-center gap-2">
+                        <template x-if="isSaving">
+                            <div class="spinner"></div>
+                        </template>
+                        <span x-text="isSaving ? 'SAVING...' : 'SAVE DATA'"></span>
+                    </button>
+                    <button @click="printPDF()" class="bg-purple-600 text-white px-8 py-2 rounded font-bold shadow hover:bg-purple-700 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span>PRINT PDF</span>
+                    </button>
+                    <button @click="resetApp()" class="bg-gray-800 text-white px-6 py-2 rounded hover:bg-black transition">NEW CASE</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
 </body>
 </html>
