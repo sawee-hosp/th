@@ -5,53 +5,219 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thalassemia Unit - Thammasat Hospital</title>
     
-    <!-- Frameworks & Libraries -->
+    <!-- Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // ประกาศ Logic การทำงานของระบบทั้งหมดไว้ก่อนโหลด Alpine.js
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('thalassemiaApp', () => ({
+                view: 'login',
+                
+                // ตารางที่ 3: ฐานข้อมูล Hb Typing 22 ลำดับ
+                thalLookup: [
+                    { name: "1. A2A, Hb A2 ≤ 3.5%", interpretation: "Normal or non clinically significant thalassemia", type: "พาหะ α-thalassemia 2" },
+                    { name: "2. A2A, Hb A2 ≤ 3.5%", interpretation: "Normal Hb typing, not rule out α-thalassemia", type: "พาหะ α-thalassemia 1\nพาหะ α-thalassemia 2\nหรือ homozygous α-thalassemia 2" },
+                    { name: "3. A2A, Hb A2 3.6-8%", interpretation: "β-thalassemia trait with or without α-thalassemia", type: "β-thalassemia trait\nwith or without α-thalassemia" },
+                    { name: "4. EA, Hb E ≥ 25%", interpretation: "Hb E trait", type: "Hb E trait" },
+                    { name: "5. EA, Hb E < 25%", interpretation: "Hb E trait with or without α-thalassemia", type: "Hb E trait with or without α-thalassemia" },
+                    { name: "6. EE, Hb E ≥ 80% Hb F ≤ 5%", interpretation: "Homozygous Hb E with or without α-thalassemia", type: "Homozygous Hb E\nwith or without α-thalassemia" },
+                    { name: "7. EE/ EF, Hb E > 75% Hb F > 5 %", interpretation: "suspected homozygous Hb E or β-thalassemia/ Hb E with or with out α- thalassemia", type: "suspected homozygous Hb E\nไม่มีอาการของโรคธาลัสซีเมีย\nsuspected β-thalassemia/ Hb E\nมีอาการของโรคธาลัสซีเมีย" },
+                    { name: "8. CS A2A", interpretation: "suspected Hb Constant Spring", type: "Hb Constant Spring trait" },
+                    { name: "9. CS A2A Bart’s", interpretation: "suspected homozygous Hb Constant Spring", type: "Homozygous Hb Constant Spring" },
+                    { name: "10. A2A H หรือ A2A Bart’s H", interpretation: "Hb H disease (α- thalassemia 1 / α- thalassemia 2)", type: "Hb H disease\n(α- thalassemia 1 / α- thalassemia 2)" },
+                    { name: "11. CS A2A H หรือ CS A2A Bart’s H", interpretation: "Hb H-CS disease (α- thalassemia 1 / Hb Constant Spring)", type: "Hb H-CS disease\n(α- thalassemia 1 / Hb Constant Spring)" },
+                    { name: "12. A2F", interpretation: "Homozygous β0-thalassemia with or without α-thalassemia", type: "Homozygous β0-thalassemia\nwith or without α-thalassemia" },
+                    { name: "13. EF Hb E 40-80% , Hb F 20-60%", interpretation: "suspected β0-thalassemia/ Hb E or HPFH/ Hb E with or without α-thalassemia", type: "suspected β0-thalassemia/Hb E\nwith or without α-thalassemia\nมีอาการของโรคธาลัสซีเมีย\nsuspected HPFH/ Hb E\nwith or without α-thalassemia\nไม่มีอาการของโรคธาลัสซีเมีย" },
+                    { name: "14. A2FA, Hb F 10-30%", interpretation: "suspected β0-thalassemia/ β+-thalassemia or β+-thalassemia/ β+-thalassemia or HPFH trait or (δβ)0-thalassemia trait with or without α-thalassemia", type: "suspected β0-thalassemia/ β+-thalassemia\nor β+-thalassemia/ β+-thalassemia\nwith or without α-thalassemia\nมีอาการของโรคธาลัสซีเมีย\nsuspected HPFH trait or (δβ)0-thalassemia trait\nwith or without α-thalassemia\nไม่มีอาการของโรคธาลัสซีเมีย" },
+                    { name: "15. EFA", interpretation: "β+-thalassemia/ Hb E with or without α-thalassemia", type: "β+-thalassemia/ Hb E\nwith or without α-thalassemia" },
+                    { name: "16. EA Bart’s", interpretation: "EA Bart’s disease", type: "EA Bart’s disease" },
+                    { name: "17. EE Bart’s or EF Bart’s", interpretation: "EF Bart’s disease", type: "EF Bart’s disease" },
+                    { name: "18. EFA Bart’s", interpretation: "EFA Bart’s disease", type: "EFA Bart’s disease" },
+                    { name: "19. CS EA Bart’s", interpretation: "CS EA Bart’s disease", type: "CS EA Bart’s disease" },
+                    { name: "20. CS EE Bart’s หรือ CS EF Bart’s", interpretation: "CS EF Bart’s disease", type: "CS EF Bart’s disease" },
+                    { name: "21. CS EFA Bart’s", interpretation: "CS EFA Bart’s disease", type: "CS EFA Bart’s disease" },
+                    { name: "22. rare abnormal Hb", interpretation: "suspected abnormal Hb", type: "suspected abnormal Hb" }
+                ],
+                
+                labItems: ['OF', 'DCIP', 'MCV', 'MCH', 'Hb A', 'A2', 'Hb F', 'Hb Cs', 'Hb Bart', 'Hb H'],
+                
+                formData: {
+                    wife: { name: '', surname: '', age: '', hn: '' },
+                    husband: { name: '', surname: '', age: '', hn: '' },
+                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '' }
+                },
+                
+                labData: {
+                    wife: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' },
+                    husband: { knowOrder: false, orderType: '', dcip: 'Unknown', of: 'Unknown', hbeLogic: 'separate', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' }
+                },
+                
+                result: { wife: null, husband: null, ready: false, riskText: '', dnaAlpha: false, dnaBeta: false },
+
+                getKey(item) { 
+                    const map = { 'OF': 'of', 'DCIP': 'dcip', 'MCV': 'mcv', 'MCH': 'mch', 'Hb A': 'hba', 'A2': 'hba2', 'Hb F': 'hbf', 'Hb Cs': 'hbcs', 'Hb Bart': 'hbbart', 'Hb H': 'hbh' };
+                    return map[item] || item.toLowerCase().replace(/\s+/g, '');
+                },
+
+                getTotal(p) {
+                    const lab = this.labData[p];
+                    const hbeVal = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
+                    const sum = (parseFloat(lab.hba) || 0) + (parseFloat(lab.hba2) || 0) + (parseFloat(lab.hbf) || 0) + (parseFloat(lab.hbcs) || 0) + (parseFloat(lab.hbbart) || 0) + (parseFloat(lab.hbh) || 0) + hbeVal;
+                    return sum.toFixed(1);
+                },
+
+                interpretHbTyping(person) {
+                    const lab = this.labData[person];
+                    
+                    // 1. ถ้าเลือกหมายเลขจาก Dropdown ตรงๆ
+                    if (lab.knowOrder && lab.orderType) {
+                        const idx = parseInt(lab.orderType) - 1;
+                        return { id: idx + 1, ...this.thalLookup[idx] };
+                    }
+
+                    // 2. ดึงค่าจากช่อง Input
+                    const mcv = parseFloat(lab.mcv) || 0;
+                    const mch = parseFloat(lab.mch) || 0;
+                    const hba = parseFloat(lab.hba) || 0;
+                    const hba2 = parseFloat(lab.hba2) || 0;
+                    const hbf = parseFloat(lab.hbf) || 0;
+                    const hbe_val = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
+                    const totalEplusA2 = lab.hbeLogic === 'combined' ? hbe_val : (hbe_val + hba2);
+
+                    const hasBart = parseFloat(lab.hbbart) > 0 || lab.hbbart === 'Positive';
+                    const hasH = parseFloat(lab.hbh) > 0 || lab.hbh === 'Positive';
+                    const hasCS = parseFloat(lab.hbcs) > 0 || lab.hbcs === 'Positive';
+                    const hasE = hbe_val > 0;
+
+                    let idx = -1;
+
+                    // แปลผลตามชนิดฮีโมโกลบิน
+                    if (hasBart || hasH || hasCS) {
+                        if (hasCS && hasE && hba > 0 && hbf > 0 && hasBart) idx = 20; // 21
+                        else if (hasCS && hasE && hba === 0 && hbf > 0 && hasBart) idx = 19; // 20
+                        else if (hasCS && hasE && hba > 0 && hasBart) idx = 18; // 19
+                        else if (hasCS && hasE) idx = 19; // 20
+                        else if (hasE && hba > 0 && hbf > 0 && hasBart) idx = 17; // 18
+                        else if (hasE && hbf > 0 && hasBart) idx = 16; // 17
+                        else if (hasE && hba > 0 && hasBart) idx = 15; // 16
+                        else if (hasCS && hasH) idx = 10; // 11
+                        else if (hasCS && hasBart) idx = 8; // 9
+                        else if (hasCS) idx = 7; // 8
+                        else idx = 9; // 10
+                    } else if (hasE) {
+                        if (hba > 0 && hbf > 0) idx = 14; // 15
+                        else if (totalEplusA2 >= 80 && hbf <= 5 && hba === 0) idx = 5; // 6
+                        else if (totalEplusA2 > 75 && hbf > 5 && hba === 0) idx = 6; // 7
+                        else if (totalEplusA2 >= 40 && totalEplusA2 <= 80 && hbf >= 20 && hbf <= 60 && hba === 0) idx = 12; // 13
+                        else idx = totalEplusA2 >= 25 ? 3 : 4; // 4 or 5
+                    } else if (hba === 0 && hbf > 0) {
+                        idx = 11; // 12
+                    } else if (hbf >= 10 && hbf <= 30 && hba > 0) {
+                        idx = 13; // 14
+                    } else if (hba > 0 || hba2 > 0) {
+                        if (hba2 > 3.5 && hba2 <= 8.0) {
+                            idx = 2; // 3
+                        } else if (hba2 <= 3.5 && hba2 > 0) {
+                            // Smart Screening Decision: A2A
+                            let isAbnormal = (lab.of === 'Positive' || (mcv > 0 && mcv < 80) || (mch > 0 && mch < 27));
+                            let isNormal = (lab.of === 'Negative' || mcv >= 80 || mch >= 27);
+                            
+                            if (isAbnormal) idx = 1; // Type 2
+                            else if (isNormal) idx = 0; // Type 1
+                        }
+                    }
+
+                    if (idx !== -1) {
+                        return { id: idx + 1, ...this.thalLookup[idx] };
+                    }
+                    return null;
+                },
+
+                // แบ่งกลุ่ม 1-6 (ตามตารางที่ 4)
+                getGroup(id, hbfVal) {
+                    if (id === 1) return 1;
+                    if ([2, 8, 9, 10, 11].includes(id)) return 2;
+                    if (id === 3) return 3;
+                    if (id === 4) return 4;
+                    if ([5, 6, 16, 19].includes(id)) return 5;
+                    if (id === 20) return parseFloat(hbfVal) > 5 ? 6 : 5; // แยก CS EE Bart's (5) กับ CS EF Bart's (6)
+                    return 6;
+                },
+
+                generateResult() {
+                    this.result.wife = this.interpretHbTyping('wife');
+                    this.result.husband = this.interpretHbTyping('husband');
+                    
+                    if (this.result.wife && this.result.husband) {
+                        const gW = this.getGroup(this.result.wife.id, this.labData.wife.hbf);
+                        const gH = this.getGroup(this.result.husband.id, this.labData.husband.hbf);
+                        
+                        let g1 = Math.min(gW, gH);
+                        let g2 = Math.max(gW, gH);
+                        
+                        let risk = false;
+                        let alpha = false;
+                        let beta = false;
+
+                        // ตรรกะจับคู่เสี่ยง ตามตารางที่ 4 ของกรมวิทยาศาสตร์การแพทย์
+                        if (g1 === 1) {
+                            risk = false; alpha = false; beta = false;
+                        } else if (g1 === 4 && g2 === 4) {
+                            risk = false; alpha = false; beta = false;
+                        } else if (g1 === 2 && g2 === 4) {
+                            risk = false; alpha = false; beta = false;
+                        } else if (g1 === 4 && g2 === 5) {
+                            risk = false; alpha = false; beta = false;
+                        } else if ((g1 === 3 && g2 === 4) || (g1 === 4 && g2 === 6)) {
+                            risk = true; alpha = false; beta = true;
+                        } else if (g1 === 2 || (g1 === 5 && g2 === 5)) {
+                            risk = true; alpha = true; beta = false;
+                        } else {
+                            // กรณีที่เหลือ (3x3, 3x5, 3x6, 5x6, 6x6)
+                            risk = true; alpha = true; beta = true;
+                        }
+
+                        this.result.riskText = risk ? "มีความเสี่ยง" : "ไม่มีความเสี่ยง";
+                        this.result.dnaAlpha = alpha;
+                        this.result.dnaBeta = beta;
+                    } else if (this.result.wife) {
+                        this.result.riskText = "รอประเมินผล";
+                    }
+
+                    this.result.ready = true;
+                    this.view = 'result';
+                    window.scrollTo(0,0);
+                }
+            }));
+        });
+    </script>
+    
+    <!-- โหลด Alpine.js ให้ทำงานหลังประกาศ Data -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <style>
         [x-cloak] { display: none !important; }
         html, body { height: 100%; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', 'Sarabun', sans-serif; 
-            background-color: #f1f5f9; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
-        }
-        .main-wrapper { 
-            flex: 1 0 auto; 
-            background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url("https://poonnaphop.github.io/thalass/static/media/blood3.8b03985a0be9bac11946.jpg"); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        body { font-family: 'Inter', 'Sarabun', sans-serif; background-color: #f1f5f9; display: flex; flex-direction: column; min-height: 100vh; }
+        .main-wrapper { flex: 1 0 auto; background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url("https://poonnaphop.github.io/thalass/static/media/blood3.8b03985a0be9bac11946.jpg"); background-size: cover; background-position: center; background-attachment: fixed; display: flex; flex-direction: column; }
+        
         .input-group { position: relative; margin-top: 10px; }
         .input-field { width: 100%; padding: 12px 14px; border: 1px solid #c4c4c4; border-radius: 4px; background: white; outline: none; transition: all 0.2s; font-size: 1rem; color: #1e293b; }
         .input-field:focus { border: 2px solid #1e88e5; padding: 11px 13px; }
         .input-field:disabled { background-color: #f8fafc; color: #64748b; cursor: not-allowed; border-color: #cbd5e1; }
         .input-label { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); padding: 0 5px; color: #757575; transition: all 0.2s ease-out; pointer-events: none; }
         .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { top: 0; transform: translateY(-50%) scale(0.8); background: white; color: #1e88e5; font-weight: 600; left: 8px; }
+        
         .group-box { position: relative; border: 1px solid #d1d5db; border-radius: 4px; padding: 1.25rem 1rem 1rem 1rem; margin-top: 1.25rem; background: rgba(255, 255, 255, 0.6); }
         .group-label { position: absolute; top: 0; left: 12px; transform: translateY(-50%); background: white; padding: 0 6px; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; }
         .footer { flex-shrink: 0; background-color: #0d47a1; color: white; padding: 16px 24px; font-size: 0.85rem; width: 100%; }
         .tu-blue { background-color: #1e88e5; }
         .no-print { display: block; }
         @media print { .no-print { display: none !important; } }
-        
-        /* เพิ่ม Animation ที่ถูกเรียกใช้ในคลาส */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
     </style>
 </head>
 <body x-data="thalassemiaApp()" x-cloak>
@@ -60,7 +226,7 @@
     <nav x-show="view !== 'login'" class="tu-blue text-white shadow-lg px-4 py-3 flex justify-between items-center no-print sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <svg @click="view = 'menu'" class="w-6 h-6 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            <span class="text-xl font-semibold uppercase tracking-tight">Thalassemia Unit</span>
+            <span class="text-xl font-semibold uppercase tracking-tight text-white">Thalassemia Unit</span>
         </div>
         <div @click="view = 'login'" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition shadow-inner">
             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
@@ -81,8 +247,8 @@
 
         <!-- View: Menu -->
         <div x-show="view === 'menu'" class="max-w-5xl mx-auto mt-24 p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
-            <button @click="view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition font-bold text-gray-700 text-xl border uppercase tracking-widest">HB TYPING</button>
-            <button @click="view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition font-bold text-gray-700 text-xl border uppercase tracking-widest text-center">Alpha & Beta Thalassemia Screening</button>
+            <button @click="view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition font-bold text-gray-700 text-xl border uppercase tracking-widest active:scale-95">HB TYPING</button>
+            <button @click="view = 'info'" class="bg-white/90 p-16 rounded shadow-xl hover:shadow-2xl transition font-bold text-gray-700 text-xl border uppercase tracking-widest text-center active:scale-95">Alpha & Beta Thalassemia Screening</button>
         </div>
 
         <!-- View: Info -->
@@ -90,7 +256,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <template x-for="p in ['wife', 'husband']" :key="p">
                     <div class="bg-white p-8 rounded shadow border">
-                        <h3 class="text-xl font-bold text-blue-600 mb-8 border-b pb-2 uppercase" x-text="p"></h3>
+                        <h3 class="text-xl font-bold text-blue-600 mb-8 border-b pb-2 uppercase" x-text="p === 'wife' ? 'หญิงตั้งครรภ์ (Wife)' : 'สามี (Husband)'"></h3>
                         <div class="input-group"><input type="text" x-model="formData[p].name" class="input-field" placeholder=" "><label class="input-label">Name</label></div>
                         <div class="input-group"><input type="text" x-model="formData[p].surname" class="input-field" placeholder=" "><label class="input-label">Surname</label></div>
                         <div class="input-group"><input type="number" x-model="formData[p].age" class="input-field" placeholder=" "><label class="input-label">Age</label></div>
@@ -114,13 +280,13 @@
         <div x-show="view === 'lab'" class="max-w-4xl mx-auto p-6 space-y-12 pb-40 animate-fadeIn">
             <template x-for="p in ['wife', 'husband']" :key="p">
                 <div class="bg-white p-8 rounded shadow-lg border">
-                    <h3 class="text-xl font-bold text-gray-800 mb-8 uppercase border-b pb-2" x-text="p === 'wife' ? 'Mother (ภรรยา)' : 'Father (สามี)'"></h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-8 uppercase border-b pb-2" x-text="p === 'wife' ? 'หญิงตั้งครรภ์ (Wife)' : 'สามี (Husband)'"></h3>
                     <div class="mb-8 p-4 bg-blue-50/50 rounded border border-blue-100 flex items-center gap-4">
                         <input type="checkbox" x-model="labData[p].knowOrder" :id="'k_'+p" class="w-5 h-5 rounded text-blue-600">
-                        <label :for="'k_'+p" class="font-bold text-tu-blue cursor-pointer whitespace-nowrap text-sm uppercase">Know Hb Typing?</label>
+                        <label :for="'k_'+p" class="font-bold text-tu-blue cursor-pointer whitespace-nowrap text-sm uppercase">ระบุผล Hb Typing (ถ้าทราบ)</label>
                         <select x-show="labData[p].knowOrder" x-model="labData[p].orderType" class="input-field !py-2 flex-1 text-sm font-bold">
-                            <option value="">-- Choose Known Type --</option>
-                            <template x-for="(t, i) in thalTypes" :key="i"><option :value="i+1" x-text="t"></option></template>
+                            <option value="">-- เลือกลำดับ / ผลการตรวจ Hb typing --</option>
+                            <template x-for="(t, i) in thalLookup" :key="i"><option :value="i+1" x-text="t.name"></option></template>
                         </select>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-1">
@@ -129,14 +295,17 @@
                         <div class="group-box"><span class="group-label">DCIP</span><div class="flex justify-between mt-1 text-[10px] font-bold uppercase tracking-tighter"><label><input type="radio" value="Positive" x-model="labData[p].dcip"> Positive</label><label><input type="radio" value="Negative" x-model="labData[p].dcip"> Negative</label><label><input type="radio" value="Unknown" x-model="labData[p].dcip"> Unknown</label></div></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].mcv"><label class="input-label">MCV (fL)</label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].mch"><label class="input-label">MCH (pg)</label></div>
+                        
                         <div class="col-span-2 my-6 border-b border-gray-100"></div>
-                        <!-- Hb Typing -->
+
+                        <!-- Typing -->
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hba" :disabled="labData[p].knowOrder"><label class="input-label">%Hb A</label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hba2" :disabled="labData[p].knowOrder"><label class="input-label">%Hb A<sub>2</sub></label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbf" :disabled="labData[p].knowOrder"><label class="input-label">%Hb F</label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbcs" :disabled="labData[p].knowOrder"><label class="input-label">%Hb Cs</label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbbart" :disabled="labData[p].knowOrder"><label class="input-label">%Hb Bart</label></div>
                         <div class="input-group"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbh" :disabled="labData[p].knowOrder"><label class="input-label">%Hb H</label></div>
+                        
                         <div class="col-span-2 group-box mt-6 border-blue-200">
                             <span class="group-label">Hb E <input type="radio" value="separate" x-model="labData[p].hbeLogic" class="ml-2" :disabled="labData[p].knowOrder"> Separate <input type="radio" value="combined" x-model="labData[p].hbeLogic" class="ml-2" :disabled="labData[p].knowOrder"> %Hb A<sub>2</sub>+E <input type="radio" value="none" x-model="labData[p].hbeLogic" class="ml-2" :disabled="labData[p].knowOrder"> None</span>
                             <div class="mt-4">
@@ -147,9 +316,17 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Footer -->
                         <div class="col-span-2 flex justify-between items-end mt-8 border-t pt-4">
-                            <div class="text-left"><span class="text-[10px] text-gray-400 font-bold uppercase block tracking-tighter">Interpretation</span><span class="text-sm font-bold text-red-600" x-text="interpretHbTyping(p) ? interpretHbTyping(p).type : 'รอข้อมูลครบถ้วน...'"></span></div>
-                            <div class="text-right"><span class="text-[10px] text-gray-400 font-bold uppercase block">Total Hb</span><span class="text-2xl font-bold text-tu-blue" x-text="getTotal(p) + '%'"></span></div>
+                            <div class="text-left">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase block tracking-tighter">ผลการตรวจ Hb typing</span>
+                                <span class="text-sm font-bold text-red-600" x-text="interpretHbTyping(p) ? (interpretHbTyping(p).name) : 'รอข้อมูล...'"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Total Hb</span>
+                                <span class="text-2xl font-bold text-tu-blue" x-text="getTotal(p) + '%'"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -160,51 +337,73 @@
         <!-- View: Result -->
         <div x-show="view === 'result' && result.ready" class="max-w-6xl mx-auto p-6 space-y-8 pb-40 animate-fadeIn">
             <div class="bg-white p-10 rounded shadow-2xl border">
-                <h1 class="text-2xl font-bold text-center mb-10 text-gray-800 border-b-2 border-tu-blue pb-4 uppercase tracking-tight">Screening Result Summary</h1>
-                <div class="mb-8 flex flex-col md:flex-row gap-4 items-end border-b pb-4"><span class="font-bold text-tu-blue whitespace-nowrap text-lg uppercase tracking-tight">Consultant:</span><input type="text" x-model="result.consultant" class="flex-1 outline-none text-tu-blue font-bold border-none px-2 text-xl focus:border-b-2 focus:border-blue-500 bg-transparent"></div>
+                <h1 class="text-2xl font-bold text-center mb-10 text-gray-800 border-b-2 border-tu-blue pb-4 uppercase tracking-tight">Thalassemia Screening Summary</h1>
+                <div class="mb-8 flex flex-col md:flex-row gap-4 items-end border-b pb-4"><span class="font-bold text-tu-blue whitespace-nowrap text-lg uppercase tracking-tight">Consultant Name:</span><input type="text" placeholder="พิมพ์ชื่อผู้ให้คำปรึกษา" class="flex-1 outline-none text-tu-blue font-bold border-none px-2 text-xl focus:border-b-2 focus:border-blue-500 bg-transparent"></div>
                 
+                <!-- Table Details -->
                 <div class="overflow-x-auto mb-10">
                     <table class="w-full border-collapse">
-                        <thead><tr class="tu-blue text-white text-xs uppercase tracking-wider"><th class="border border-gray-300 p-3 text-left">รายการตรวจ</th><th class="border border-gray-300 p-3">ภรรยา (Wife)</th><th class="border border-gray-300 p-3">สามี (Husband)</th></tr></thead>
+                        <thead><tr class="tu-blue text-white text-xs uppercase tracking-wider"><th class="border border-gray-300 p-3 text-left">รายการตรวจ</th><th class="border border-gray-300 p-3">หญิงตั้งครรภ์</th><th class="border border-gray-300 p-3">สามี</th></tr></thead>
                         <tbody class="text-sm">
-                            <tr><td class="border border-gray-300 p-3 font-bold bg-gray-50 uppercase tracking-tighter">Name-Surname</td><td class="border border-gray-300 p-3 text-center" x-text="formData.wife.name + ' ' + formData.wife.surname"></td><td class="border border-gray-300 p-3 text-center" x-text="(formData.husband.name || labData.husband.hba > 0) ? (formData.husband.name + ' ' + formData.husband.surname) : '-'"></td></tr>
+                            <tr><td class="border border-gray-300 p-3 font-bold bg-gray-50 tracking-tighter">ชื่อ-นามสกุล</td><td class="border border-gray-300 p-3 text-center" x-text="formData.wife.name + ' ' + formData.wife.surname"></td><td class="border border-gray-300 p-3 text-center" x-text="(formData.husband.name || labData.husband.of !== 'Unknown' || getTotal('husband') > 0) ? (formData.husband.name + ' ' + formData.husband.surname) : '-'"></td></tr>
                             <template x-for="item in labItems" :key="item">
                                 <tr>
                                     <td class="border border-gray-300 p-3 font-bold bg-gray-50 uppercase tracking-tighter" x-text="item === 'MCV' ? 'MCV (fL)' : (item === 'MCH' ? 'MCH (pg)' : (['Hb A','A2','Hb F','Hb Cs','Hb Bart','Hb H'].includes(item) ? '%'+item : item))"></td>
                                     <td class="border border-gray-300 p-3 text-center" x-text="labData.wife[getKey(item)] || '0'"></td>
-                                    <td class="border border-gray-300 p-3 text-center" x-text="(labData.husband.hba > 0 || labData.husband.of !== 'Unknown' || formData.husband.name) ? (labData.husband[getKey(item)] || '0') : '-'"></td>
+                                    <td class="border border-gray-300 p-3 text-center" x-text="(formData.husband.name || labData.husband.of !== 'Unknown' || getTotal('husband') > 0) ? (labData.husband[getKey(item)] || '0') : '-'"></td>
                                 </tr>
                             </template>
-                            <tr class="bg-blue-50"><td class="border border-gray-300 p-3 font-bold text-tu-blue uppercase tracking-tighter text-xs">Hb Typing Result</td><td class="border border-gray-300 p-3 text-center text-red-600 font-bold" x-text="result.wife?.type || '-'"></td><td class="border border-gray-300 p-3 text-center text-red-600 font-bold" x-text="result.husband?.type || '-'"></td></tr>
+                            
+                            <!-- Detailed Interpretation Rows -->
+                            <tr class="bg-blue-50">
+                                <td class="border border-gray-300 p-3 font-bold text-tu-blue text-xs">ผลการตรวจ Hb typing</td>
+                                <td class="border border-gray-300 p-3 text-center text-red-600 font-bold" x-text="result.wife?.name || '-'"></td>
+                                <td class="border border-gray-300 p-3 text-center text-red-600 font-bold" x-text="result.husband?.name || '-'"></td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-bold text-gray-700 text-xs">การแปลผล (Interpretation)</td>
+                                <td class="border border-gray-300 p-3 text-center whitespace-pre-line text-xs" x-text="result.wife?.interpretation || '-'"></td>
+                                <td class="border border-gray-300 p-3 text-center whitespace-pre-line text-xs" x-text="result.husband?.interpretation || '-'"></td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-bold text-gray-700 text-xs">ชนิดของธาลัสซีเมีย</td>
+                                <td class="border border-gray-300 p-3 text-center whitespace-pre-line text-xs" x-text="result.wife?.type || '-'"></td>
+                                <td class="border border-gray-300 p-3 text-center whitespace-pre-line text-xs" x-text="result.husband?.type || '-'"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="space-y-6">
-                    <div class="p-6 bg-gray-50 rounded border-l-8 border-red-500 shadow-sm">
-                        <h4 class="font-bold text-red-700 uppercase text-[10px] mb-2 tracking-widest">ความเสี่ยงของทารกในครรภ์ (Risk Assessment)</h4>
-                        <p class="text-xl font-bold text-gray-800" x-text="result.riskText"></p>
+                    <!-- Simple Risk Text -->
+                    <div class="p-6 bg-gray-50 rounded border shadow-sm">
+                        <h4 class="font-bold text-gray-800 uppercase text-[10px] mb-2 tracking-widest">ความเสี่ยงของทารกในครรภ์ (Risk Assessment)</h4>
+                        <p class="text-xl font-bold" x-text="result.riskText"></p>
                     </div>
 
+                    <!-- DNA Table exactly as requested -->
                     <div class="p-6 bg-white rounded border shadow-sm">
-                        <h4 class="font-bold text-blue-700 uppercase text-[10px] mb-4 tracking-widest">การส่งตรวจยืนยันระดับ DNA (DNA Analysis)</h4>
+                        <h4 class="font-bold text-blue-800 uppercase text-[10px] mb-4 tracking-widest">การส่งตรวจยืนยันระดับ DNA (DNA Analysis)</h4>
                         <table class="w-full border text-sm text-center">
-                            <tr class="bg-gray-100 font-bold uppercase text-[10px]"><td class="border p-2 text-left">ยีนที่แนะนำให้ส่งตรวจ</td><td class="border p-2">สถานะการส่งตรวจ</td></tr>
-                            <tr><td class="border p-2 text-left">Alpha thalassemia 1 (SEA, THAI mutation)</td><td class="border p-2 text-xl" x-text="result.dnaAlpha ? '✅' : '❌'"></td></tr>
-                            <tr><td class="border p-2 text-left">Beta mutation Analysis (Beta-thalassemia/Hb E)</td><td class="border p-2 text-xl" x-text="result.dnaBeta ? '✅' : '❌'"></td></tr>
+                            <tr class="bg-gray-100 font-bold text-[12px]">
+                                <td class="border p-3 text-left">การส่งตรวจยืนยัน ระดับ DNA<br>(DNA Analysis)</td>
+                                <td class="border p-3">Alpha thalassemia 1</td>
+                                <td class="border p-3">Beta mutation</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-3 text-left font-medium text-gray-700">ส่งตรวจ</td>
+                                <td class="border p-3 text-xl font-bold" x-text="result.dnaAlpha ? '✅' : '❌'"></td>
+                                <td class="border p-3 text-xl font-bold" x-text="result.dnaBeta ? '✅' : '❌'"></td>
+                            </tr>
                         </table>
-                    </div>
-
-                    <div class="p-6 bg-gray-50 rounded border-l-8 border-blue-500 shadow-sm">
-                        <h4 class="font-bold text-blue-700 uppercase text-[10px] mb-2 tracking-widest">คำแนะนำ (Genetic Counseling)</h4>
-                        <p class="text-gray-700 whitespace-pre-line leading-relaxed text-sm" x-text="result.recommendation"></p>
                     </div>
                 </div>
 
+                <!-- Footer Actions -->
                 <div class="flex justify-between items-center mt-16 no-print">
                     <div class="flex gap-4">
                         <button @click="location.reload()" class="text-gray-400 font-bold uppercase text-xs hover:text-red-600 transition">Clear Form</button>
-                        <button @click="view = 'lab'" class="tu-blue text-white px-6 py-2 rounded text-xs font-bold uppercase tracking-widest hover:opacity-90 shadow-md transition">Back to Edit</button>
+                        <button @click="view = 'lab'" class="bg-gray-200 text-gray-700 px-6 py-2 rounded text-xs font-bold uppercase tracking-widest hover:bg-gray-300 transition shadow-sm active:scale-95">Back to Edit</button>
                     </div>
                     <button onclick="window.print()" class="px-16 py-3 tu-blue text-white rounded shadow-lg font-bold uppercase tracking-widest hover:opacity-90 active:scale-95 transition text-sm">PRINT REPORT</button>
                 </div>
@@ -212,154 +411,10 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer x-show="view !== 'login'" class="footer no-print">
-        <div class="max-w-6xl mx-auto text-left"><span class="font-semibold uppercase tracking-wider text-xs">Copyright © 2025 Thammasart Hospital University, Thailand.</span></div>
+    <!-- Static Footer -->
+    <footer x-show="view !== 'login'" class="footer no-print text-center">
+        <span class="font-semibold uppercase tracking-wider text-xs text-white/80">Copyright © 2025 Thammasart Hospital University, Thailand.</span>
     </footer>
 
-    <script>
-        function thalassemiaApp() {
-            return {
-                view: 'login',
-                thalTypes: [
-                    "1. A2A, Hb A2 <= 3.5% (Normal)",
-                    "2. A2A, Hb A2 <= 3.5% (Not rule out alpha)",
-                    "3. A2A, Hb A2 3.6-8.0% (beta-trait)",
-                    "4. EA, Hb E + Hb A2 >= 25% (Hb E trait)",
-                    "5. EA, Hb E + Hb A2 < 25% (Hb E trait + alpha)",
-                    "6. EE, Hb E + Hb A2 >= 80%, Hb F <= 5%",
-                    "7. EE/EF, E + Hb A2 > 75%, Hb F > 5%",
-                    "8. CS A2A",
-                    "9. CS A2A Bart's",
-                    "10. A2A H หรือ A2A Bart's H",
-                    "11. CS A2A H หรือ CS A2A Bart's H",
-                    "12. A2F (Homozygous beta0)",
-                    "13. EF, Hb E + Hb A2 40-80%, Hb F 20-60%",
-                    "14. A2FA, Hb F 10-30%",
-                    "15. EFA (beta+-thalassemia/Hb E)",
-                    "16. EA Bart's disease",
-                    "17. EE Bart's หรือ EF Bart's",
-                    "18. EFA Bart's disease",
-                    "19. CS EA Bart's disease",
-                    "20. CS EA (Hb E trait with Hb Constant Spring)",
-                    "21. CS EE Bart's หรือ CS EF Bart's",
-                    "22. CS EFA Bart's disease",
-                    "23. Rare abnormal Hb"
-                ],
-                labItems: ['OF', 'DCIP', 'MCV', 'MCH', 'Hb A', 'A2', 'Hb F', 'Hb Cs', 'Hb Bart', 'Hb H'],
-                formData: {
-                    wife: { name: '', surname: '', age: '', hn: '' },
-                    husband: { name: '', surname: '', age: '', hn: '' },
-                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '' }
-                },
-                labData: {
-                    wife: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' },
-                    husband: { knowOrder: false, orderType: '', dcip: 'Unknown', of: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' }
-                },
-                result: { wife: null, husband: null, ready: false, riskText: '', recommendation: '', consultant: '', dnaAlpha: false, dnaBeta: false },
-
-                getKey(item) {
-                    const map = { 'OF': 'of', 'DCIP': 'dcip', 'MCV': 'mcv', 'MCH': 'mch', 'Hb A': 'hba', 'A2': 'hba2', 'Hb F': 'hbf', 'Hb Cs': 'hbcs', 'Hb Bart': 'hbbart', 'Hb H': 'hbh' };
-                    return map[item] || item.toLowerCase().replace(/\s+/g, '');
-                },
-
-                getTotal(p) {
-                    const lab = this.labData[p];
-                    const hbe = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
-                    return ((parseFloat(lab.hba) || 0) + (parseFloat(lab.hba2) || 0) + (parseFloat(lab.hbf) || 0) + (parseFloat(lab.hbcs) || 0) + (parseFloat(lab.hbbart) || 0) + (parseFloat(lab.hbh) || 0) + hbe).toFixed(1);
-                },
-
-                interpretHbTyping(p) {
-                    const lab = this.labData[p];
-                    if (lab.knowOrder && lab.orderType) return { id: parseInt(lab.orderType), type: this.thalTypes[parseInt(lab.orderType)-1] };
-                    const mcv = parseFloat(lab.mcv) || 0; const mch = parseFloat(lab.mch) || 0;
-                    const hba = parseFloat(lab.hba) || 0; const hba2 = parseFloat(lab.hba2) || 0;
-                    const hbf = parseFloat(lab.hbf) || 0;
-                    const hbe_v = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
-                    const totalEplusA2 = lab.hbeLogic === 'combined' ? hbe_v : (hbe_v + hba2);
-                    const hasBart = parseFloat(lab.hbbart) > 0 || lab.hbbart === 'Positive';
-                    const hasH = parseFloat(lab.hbh) > 0 || lab.hbh === 'Positive';
-                    const hasCS = parseFloat(lab.hbcs) > 0 || lab.hbcs === 'Positive';
-                    if (hasBart || hasH || hasCS) {
-                        if (hasCS && hbe_v > 0 && hba > 0 && hbf > 0 && hasBart) return { id: 22, type: this.thalTypes[21] };
-                        if (hasCS && hbe_v > 0 && hba === 0 && hbf > 0 && hasBart) return { id: 21, type: this.thalTypes[20] };
-                        if (hasCS && hbe_v > 0 && hba > 0 && hasBart) return { id: 19, type: this.thalTypes[18] };
-                        if (hasCS && hbe_v > 0) return { id: 20, type: this.thalTypes[19] };
-                        if (hbe_v > 0 && hbf > 0 && hba > 0 && hasBart) return { id: 18, type: this.thalTypes[17] };
-                        if (hbe_v > 0 && hbf > 0 && hasBart) return { id: 17, type: this.thalTypes[16] };
-                        if (hbe_v > 0 && hba > 0 && hasBart) return { id: 16, type: this.thalTypes[15] };
-                        if (hasCS && hasH) return { id: 11, type: this.thalTypes[10] };
-                        if (hasCS && hasBart) return { id: 9, type: this.thalTypes[8] };
-                        if (hasCS) return { id: 8, type: this.thalTypes[7] };
-                        return { id: 10, type: this.thalTypes[9] };
-                    }
-                    if (hbe_v > 0) {
-                        if (hba > 0 && hbf > 0) return { id: 15, type: this.thalTypes[14] };
-                        if (totalEplusA2 >= 80 && hbf <= 5 && hba === 0) return { id: 6, type: this.thalTypes[5] };
-                        if (totalEplusA2 > 75 && hbf > 5 && hba === 0) return { id: 7, type: this.thalTypes[6] };
-                        if (totalEplusA2 >= 40 && totalEplusA2 <= 80 && hbf >= 20 && hbf <= 60 && hba === 0) return { id: 13, type: this.thalTypes[12] };
-                        return totalEplusA2 >= 25 ? { id: 4, type: this.thalTypes[3] } : { id: 5, type: this.thalTypes[4] };
-                    }
-                    if (hba === 0 && hbf > 0) return { id: 12, type: this.thalTypes[11] };
-                    if (hbf >= 10 && hbf <= 30 && hba > 0) return { id: 14, type: this.thalTypes[13] };
-                    if (hba > 0 || hba2 > 0) {
-                        if (hba2 > 3.5 && hba2 <= 8.0) return { id: 3, type: this.thalTypes[2] };
-                        if (hba2 <= 3.5 && hba2 > 0) {
-                            let abnormal = (lab.of === 'Positive') || (mcv > 0 && mcv < 80) || (mch > 0 && mch < 27);
-                            let normal = (lab.of === 'Negative') || (mcv >= 80) || (mch >= 27);
-                            if (abnormal) return { id: 2, type: this.thalTypes[1] };
-                            if (normal) return { id: 1, type: this.thalTypes[0] };
-                        }
-                    }
-                    return null;
-                },
-
-                getGroup(id) {
-                    if (id === 1) return 1;
-                    if ([2, 8, 9, 10, 11].includes(id)) return 2;
-                    if (id === 3) return 3;
-                    if (id === 4) return 4;
-                    if ([5, 6, 16, 19, 21].includes(id)) return 5;
-                    return 6;
-                },
-
-                generateResult() {
-                    this.result.wife = this.interpretHbTyping('wife');
-                    this.result.husband = this.interpretHbTyping('husband');
-                    if (this.result.wife && this.result.husband) {
-                        const W = this.getGroup(this.result.wife.id); const H = this.getGroup(this.result.husband.id);
-                        if (W === 1 || H === 1) {
-                            this.result.riskText = "🟢 ไม่มีความเสี่ยงในบุตร (ชนิดรุนแรง)";
-                            this.result.recommendation = "ผลการตรวจชี้ว่าท่านไม่ใช่คู่เสี่ยง ทารกในครรภ์ไม่มีความเสี่ยงที่จะเป็นโรคธาลัสซีเมียชนิดรุนแรง สามารถตั้งครรภ์ต่อไปได้ตามปกติ";
-                            this.result.dnaAlpha = false; this.result.dnaBeta = false;
-                        } else if (W === 4 || H === 4) {
-                            const p = (W === 4) ? H : W;
-                            if ([2, 4, 5].includes(p)) {
-                                this.result.riskText = "🟢 ไม่มีความเสี่ยงชนิดรุนแรง (บุตรอาจเป็นแค่ฮีโมโกลบินอีแท้)";
-                                this.result.recommendation = "บุตรอาจเป็นพาหะหรือฮีโมโกลบินอีแท้ซึ่งอาการไม่รุนแรง ไม่จำเป็นต้องตรวจยืนยัน DNA เพิ่มเติม";
-                                this.result.dnaAlpha = false; this.result.dnaBeta = false;
-                            } else {
-                                this.result.riskText = "🟠 มีความเสี่ยงโรค β-thalassemia/Hb E";
-                                this.result.recommendation = "ผลการตรวจเบื้องต้นพบว่าท่านเป็น 'คู่เสี่ยง' แนะนำส่งตรวจ DNA Analysis เพื่อยืนยันยีน Beta mutation ทั้งคู่";
-                                this.result.dnaAlpha = false; this.result.dnaBeta = true;
-                            }
-                        } else if (W === 2 || H === 2 || (W === 5 && H === 5)) {
-                            this.result.riskText = "🟡 มีความเสี่ยงโรค Hb Bart's Hydrops Fetalis";
-                            this.result.recommendation = "แนะนำให้ส่งตรวจวิเคราะห์ระดับ DNA เพื่อยืนยันยีน Alpha-thalassemia 1 ทั้งคู่";
-                            this.result.dnaAlpha = true; this.result.dnaBeta = false;
-                        } else {
-                            this.result.riskText = "🔴 มีความเสี่ยงโรคชนิดรุนแรงแบบซับซ้อน (เสี่ยงทั้ง 3 โรคหลัก)";
-                            this.result.recommendation = "แนะนำส่งตรวจ DNA Analysis เพื่อยืนยันทั้งยีน Alpha-thal 1 และ Beta mutation ทั้งคู่";
-                            this.result.dnaAlpha = true; this.result.dnaBeta = true;
-                        }
-                    }
-                    this.result.ready = true; this.view = 'result'; window.scrollTo(0,0);
-                }
-            };
-        }
-    </script>
-    
-    <!-- ย้าย Alpine.js มาไว้ท้ายไฟล์ -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
