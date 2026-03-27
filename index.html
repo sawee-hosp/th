@@ -571,23 +571,25 @@
                         ['Interpretation', {text: `${r.w && r.w.interpretation ? fmtPdfStr(r.w.interpretation) : '-'}\n(${r.w && r.w.type ? fmtPdfStr(r.w.type) : '-'})`, fontSize: 9, alignment: 'center'}, {text: `${r.h && r.h.interpretation ? fmtPdfStr(r.h.interpretation) : '-'}\n(${r.h && r.h.type ? fmtPdfStr(r.h.type) : '-'})`, fontSize: 9, alignment: 'center'}]
                     );
 
-                    // Added new row for Child Risk as requested inside the table
-                    tbody.push([
-                        { text: 'โรคที่เป็นความเสี่ยงของบุตร:', bold: true, colSpan: 3, fillColor: '#f8fafc', border: [true, true, true, false] }, {}, {}
-                    ]);
-                    tbody.push([
-                        { text: '', border: [true, false, false, true] },
-                        { 
-                            colSpan: 2, 
-                            border: [false, false, true, true],
-                            stack: [
-                                { text: [chkIcon(r.riskBarts), " Hb Bart's Hydrops Fetalis"], margin: [0, 2] },
-                                { text: [chkIcon(r.riskHomoBeta), " Homozygous Beta-thal"], margin: [0, 2] },
-                                { text: [chkIcon(r.riskBetaE), " Beta-thal / Hb E"], margin: [0, 2] }
-                            ]
-                        },
-                        {}
-                    ]);
+                    // แสดงผลความเสี่ยงของลูกเฉพาะหน้า DNA (Quick Flow) เท่านั้น
+                    if (this.flowType === 'quick') {
+                        tbody.push([
+                            { text: 'โรคที่เป็นความเสี่ยงของบุตร:', bold: true, colSpan: 3, fillColor: '#f8fafc', border: [true, true, true, false] }, {}, {}
+                        ]);
+                        tbody.push([
+                            { text: '', border: [true, false, false, true] },
+                            { 
+                                colSpan: 2, 
+                                border: [false, false, true, true],
+                                stack: [
+                                    { text: [chkIcon(r.riskBarts), " Hb Bart's Hydrops Fetalis"], margin: [0, 2] },
+                                    { text: [chkIcon(r.riskHomoBeta), " Homozygous Beta-thal"], margin: [0, 2] },
+                                    { text: [chkIcon(r.riskBetaE), " Beta-thal / Hb E"], margin: [0, 2] }
+                                ]
+                            },
+                            {}
+                        ]);
+                    }
 
                     return tbody;
                 }
