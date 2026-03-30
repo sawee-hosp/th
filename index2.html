@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thalassemia Unit, Thammasart University Hospital</title>
+    
+    <!-- Favicon DNA -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
+    
+    <!-- Frameworks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        html { scroll-behavior: smooth; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Sarabun', sans-serif; 
+            background-color: #f8fafc; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            color: #334155;
+        }
+        
+        .main-wrapper { 
+            flex: 1 0 auto; 
+            background-image: linear-gradient(rgba(248, 250, 252, 0.92), rgba(248, 250, 252, 0.95)), url("https://poonnaphop.github.io/thalass/static/media/blood3.8b03985a0be9bac11946.jpg"); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .input-group { position: relative; margin-top: 12px; }
+        .input-field { 
+            width: 100%; padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 0.5rem; 
+            background: #ffffff; outline: none; transition: all 0.2s; font-size: 1rem; 
+            color: #0f172a; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .input-field:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        .input-label { 
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%); 
+            padding: 0 4px; color: #64748b; transition: all 0.2s ease-out; pointer-events: none; 
+            background: transparent;
+        }
+        .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { 
+            top: 0; transform: translateY(-50%) scale(0.85); background: white; color: #2563eb; font-weight: 600; left: 10px; 
+        }
+        
+        .group-box { 
+            position: relative; border: 1px solid #e2e8f0; border-radius: 0.5rem; 
+            padding: 1.25rem 1rem 0.75rem 1rem; margin-top: 1rem; background: #ffffff;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .group-label { 
+            position: absolute; top: 0; left: 12px; transform: translateY(-50%); 
+            background: white; padding: 0 8px; font-size: 0.75rem; font-weight: 700; 
+            color: #475569; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        
+        .step-active { color: #2563eb; font-weight: 700; border-bottom: 3px solid #2563eb; }
+        .step-inactive { color: #94a3b8; font-weight: 500; border-bottom: 3px solid transparent; }
+
+        .no-print { display: block; }
+        @media print { .no-print { display: none !important; } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+
+    <!-- App Logic -->
+    <script>
+        function thalassemiaApp() {
+            return {
+                currentStep: 0, 
+                flowType: 'lab', 
+                
+                // สำหรับ Tab 1: Hb Typing (Lab Flow)
+                thalLookup: [
+                    { id: 1, name: "1. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal or non clinically significant thalassemia", type: "พาหะ α-thalassemia 2", has_Alpha1: false, has_Beta: false, has_HbE: false },
+                    { id: 2, name: "2. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal Hb typing, not rule out α-thalassemia", type: "พาหะ α-thalassemia 1, พาหะ α-thal 2 หรือ hom α-thal 2", has_Alpha1: true, has_Beta: false, has_HbE: false },
+                    { id: 3, name: "3. A₂A, Hb A₂ 3.6-8%", interpretation: "β-thalassemia trait w/wo α-thalassemia", type: "β-thalassemia trait w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: false },
+                    { id: 4, name: "4. EA, Hb E ≥ 25%", interpretation: "Hb E trait", type: "Hb E trait", has_Alpha1: false, has_Beta: false, has_HbE: true },
+                    { id: 5, name: "5. EA, Hb E < 25%", interpretation: "Hb E trait w/wo α-thalassemia", type: "Hb E trait w/wo α-thalassemia", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 6, name: "6. EE, Hb E ≥ 80% Hb F ≤ 5%", interpretation: "Homozygous Hb E w/wo α-thalassemia", type: "Homozygous Hb E w/wo α-thalassemia", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 7, name: "7. EE/EF, Hb E > 75% Hb F > 5%", interpretation: "suspected homozygous Hb E or β-thal/Hb E", type: "suspected homozygous Hb E or β-thalassemia/Hb E", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 8, name: "8. CS A₂A", interpretation: "suspected Hb Constant Spring", type: "Hb Constant Spring trait", has_Alpha1: false, has_Beta: false, has_HbE: false },
+                    { id: 9, name: "9. CS A₂A Bart's", interpretation: "suspected homozygous Hb Constant Spring", type: "Homozygous Hb Constant Spring", has_Alpha1: false, has_Beta: false, has_HbE: false },
+                    { id: 10, name: "10. A₂A H หรือ A₂A Bart's H", interpretation: "Hb H disease (α-thal 1 / α-thal 2)", type: "Hb H disease (α-thal 1 / α-thal 2)", has_Alpha1: true, has_Beta: false, has_HbE: false },
+                    { id: 11, name: "11. CS A₂A H หรือ CS A₂A Bart's H", interpretation: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", type: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", has_Alpha1: true, has_Beta: false, has_HbE: false },
+                    { id: 12, name: "12. A₂F", interpretation: "Homozygous β0-thalassemia w/wo α-thalassemia", type: "Homozygous β0-thalassemia w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: false },
+                    { id: 13, name: "13. EF Hb E 40-80%, Hb F 20-60%", interpretation: "suspected β0-thal/Hb E or HPFH/Hb E", type: "suspected β0-thalassemia/Hb E or HPFH/Hb E", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 14, name: "14. A₂FA, Hb F 10-30%", interpretation: "suspected β-thal disease or HPFH trait", type: "suspected β-thalassemia disease or HPFH trait", has_Alpha1: true, has_Beta: true, has_HbE: false },
+                    { id: 15, name: "15. EFA", interpretation: "β+-thalassemia/Hb E w/wo α-thalassemia", type: "β+-thalassemia/Hb E w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 16, name: "16. EA Bart's", interpretation: "EA Bart's disease", type: "EA Bart's disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 17, name: "17. EE Bart's or EF Bart's", interpretation: "EF Bart's disease", type: "EF Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 18, name: "18. EFA Bart's", interpretation: "EFA Bart's disease", type: "EFA Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 19, name: "19. CS EA Bart's", interpretation: "CS EA Bart's disease", type: "CS EA Bart's disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 20, name: "20. CS EE Bart's หรือ CS EF Bart's", interpretation: "CS EF Bart's disease", type: "CS EF Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 21, name: "21. CS EFA Bart's", interpretation: "CS EFA Bart's disease", type: "CS EFA Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 22, name: "22. rare abnormal Hb", interpretation: "suspected abnormal Hb", type: "suspected abnormal Hb", has_Alpha1: true, has_Beta: true, has_HbE: true }
+                ],
+
+                // สำหรับ Tab 2: รายชื่อโรค/DNA 13 รายการ
+                dnaLookup: [
+                    { id: 1, name: "1. ปกติ / ไม่พบความเสี่ยงใดๆ", has_Alpha1: false, has_Beta: false, has_HbE: false },
+                    { id: 2, name: "2. α-thal 1 trait", has_Alpha1: true, has_Beta: false, has_HbE: false },
+                    { id: 3, name: "3. Hb H Disease", has_Alpha1: true, has_Beta: false, has_HbE: false },
+                    { id: 4, name: "4. β-thal trait", has_Alpha1: false, has_Beta: true, has_HbE: false },
+                    { id: 5, name: "5. Homozygous β-thal", has_Alpha1: false, has_Beta: true, has_HbE: false },
+                    { id: 6, name: "6. β-thal trait ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: false },
+                    { id: 7, name: "7. Homozygous β-thal ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: false },
+                    { id: 8, name: "8. Hb E trait หรือ Homozygous Hb E", has_Alpha1: false, has_Beta: false, has_HbE: true },
+                    { id: 9, name: "9. Hb E trait หรือ Homozygous Hb E ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 10, name: "10. β-thal / Hb E", has_Alpha1: false, has_Beta: true, has_HbE: true },
+                    { id: 11, name: "11. β-thal / Hb E ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: true },
+                    { id: 12, name: "12. EA Bart's Disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
+                    { id: 13, name: "13. EF Bart's Disease", has_Alpha1: true, has_Beta: true, has_HbE: true }
+                ],
+                
+                labItems: ['OF', 'DCIP', 'MCV', 'MCH', 'Hb A', 'A₂', 'Hb F', 'Hb Cs', 'Hb Bart', 'Hb H'],
+                
+                formData: {
+                    wife: { name: '', surname: '', age: '', hn: '' },
+                    husband: { name: '', surname: '', age: '', hn: '' },
+                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '', ga_weeks: '', ga_days: '', hospital: 'Thammasat', history: '' },
+                    appointment: { date: '', ga_weeks: '', ga_days: '', attendance: '', remark: '', additional_info: '' }
+                },
+                labData: {
+                    wife: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' },
+                    husband: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', hbeLogic: 'separate', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hba2e: '', hbe_sep: '' }
+                },
+                
+                quickCalc: { wifeVal: '', husbandVal: '' },
+                result: { wife: null, husband: null, ready: false, riskText: '', dnaAlpha: false, dnaBeta: false, consultant: '' },
+
+                getRiskFromMatrix(wId, hId) {
+                    // 1. แบ่ง 22 ลำดับ ออกเป็น 5 กลุ่ม
+                    const getGroup = (id) => {
+                        const numId = parseFloat(id);
+                        if ([1].includes(numId)) return 1; // กลุ่ม 1: No Risk
+                        if ([2, 8, 9, 10, 11].includes(numId)) return 2; // กลุ่ม 2: Alpha Only
+                        if ([4].includes(numId)) return 3; // กลุ่ม 3: Beta/E Only
+                        if ([5, 6, 16, 19].includes(numId)) return 4; // กลุ่ม 4: Alpha + E
+                        // กลุ่ม 5: Alpha + Severe Beta (ปัด 20 เข้ากลุ่มนี้ตามคำแนะนำเพื่อเฝ้าระวังสูงสุด)
+                        if ([3, 7, 12, 13, 14, 15, 17, 18, 20, 21, 22].includes(numId)) return 5;
+                        return 5; // Default ค่าสูงสุดกรณีไม่ตรงเงื่อนไข
+                    };
+
+                    const wGroup = getGroup(wId);
+                    const hGroup = getGroup(hId);
+
+                    // 2. ตาราง Logic Matrix 5x5 (Wife \ Husband)
+                    // รูปแบบ: [มีความเสี่ยง, ต้องตรวจ Alpha, ต้องตรวจ Beta]
+                    const matrix = [
+                        [], // Index 0 ว่างไว้ เพื่อให้อ้างอิง index 1-5 ได้ตรงตัว
+                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [false, false, false] ], // กลุ่มภรรยา 1
+                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, false]   ], // กลุ่มภรรยา 2
+                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [true, false, true]   ], // กลุ่มภรรยา 3
+                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, true]    ], // กลุ่มภรรยา 4
+                        [ [], [false, false, false], [true, true, false],   [true, false, true],   [true, true, true],    [true, true, true]    ]  // กลุ่มภรรยา 5
+                    ];
+
+                    const [isAtRisk, needsAlpha, needsBeta] = matrix[wGroup][hGroup];
+
+                    return {
+                        isAtRisk,
+                        riskBarts: needsAlpha, 
+                        riskHomoBeta: needsBeta, 
+                        riskBetaE: false // ให้ถือว่าต้องตรวจ Beta ครอบคลุมแล้ว
+                    };
+                },
+
+                goToStep(step, type = null) {
+                    if (step === 2 && this.currentStep < 2) {
+                        this.currentStep = 3; // ข้ามขั้นที่ 2 ให้เปิดฟอร์มทันที
+                        if(!this.flowType) this.flowType = 'lab';
+                    } else if (step === 3) {
+                        if (type) this.flowType = type;
+                        this.currentStep = 3;
+                    } else if (step === 4) {
+                        this.currentStep = 4;
+                    }
+                    
+                    setTimeout(() => {
+                        let targetId = 'step' + step;
+                        if (step === 2 || step === 3) targetId = 'step3_tab_container';
+                        if (step === 4) targetId = 'step4_lab';
+                        const el = document.getElementById(targetId);
+                        if (el) {
+                            const y = el.getBoundingClientRect().top + window.scrollY - 80;
+                            window.scrollTo({top: y, behavior: 'smooth'});
+                        }
+                    }, 50);
+                },
+
+                scrollToStep(step) {
+                    if (step > this.currentStep) return;
+                    let targetId = 'step' + step;
+                    if (step >= 2 && step <= 3) targetId = 'step3_tab_container';
+                    if (step === 4) targetId = 'step4_lab';
+                    const el = document.getElementById(targetId);
+                    if (el) {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 80;
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                },
+
+                getKey(item) { 
+                    const map = { 'OF': 'of', 'DCIP': 'dcip', 'MCV': 'mcv', 'MCH': 'mch', 'Hb A': 'hba', 'A₂': 'hba2', 'Hb F': 'hbf', 'Hb Cs': 'hbcs', 'Hb Bart': 'hbbart', 'Hb H': 'hbh' };
+                    return map[item] || item.toLowerCase().replace(/\s+/g, '');
+                },
+
+                getLabTotal(lab) {
+                    const e = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
+                    return ((parseFloat(lab.hba) || 0) + (parseFloat(lab.hba2) || 0) + (parseFloat(lab.hbf) || 0) + (parseFloat(lab.hbcs) || 0) + (parseFloat(lab.hbbart) || 0) + (parseFloat(lab.hbh) || 0) + e).toFixed(1);
+                },
+                getTotal(p) { return this.getLabTotal(this.labData[p]); },
+
+                get quickRiskResult() {
+                    try {
+                        if (!this.quickCalc.wifeVal || !this.quickCalc.husbandVal) return null;
+                        
+                        const w = this.dnaLookup.find(o => o.id === parseFloat(this.quickCalc.wifeVal));
+                        const h = this.dnaLookup.find(o => o.id === parseFloat(this.quickCalc.husbandVal));
+                        if (!w || !h) return null;
+
+                        // Tab 2: ใช้กฎ 3 ข้อ (Rule 1, 2, 3) 
+                        const riskBarts = h.has_Alpha1 && w.has_Alpha1; // Rule 1
+                        const riskHomoBeta = h.has_Beta && w.has_Beta; // Rule 2
+                        const riskBetaE = (h.has_Beta && w.has_HbE) || (w.has_Beta && h.has_HbE); // Rule 3
+                        const isAtRisk = riskBarts || riskHomoBeta || riskBetaE;
+
+                        return { w, h, riskBarts, riskHomoBeta, riskBetaE, isAtRisk };
+                    } catch (e) {
+                        return null;
+                    }
+                },
+
+                get liveLabRiskResult() {
+                    try {
+                        const w = this.interpretHbTyping('wife');
+                        const h = this.interpretHbTyping('husband');
+                        if (!w || !h || (w.baseId && !w.has_Beta && w.name.includes('กรุณาระบุ')) || (h.baseId && !h.has_Beta && h.name.includes('กรุณาระบุ'))) return null; 
+                        
+                        // Tab 1: เรียกใช้ Logic Matrix แทนการเช็คยีนชนยีนแบบเดิม
+                        const riskObj = this.getRiskFromMatrix(w.id, h.id);
+                        return { w, h, ...riskObj };
+                    } catch(e) {
+                        return null;
+                    }
+                },
+
+                evaluateTyping(lab, p) {
+                    try {
+                        if (lab.knowOrder && lab.orderType) {
+                            let id = parseFloat(lab.orderType);
+                            return this.thalLookup.find(t => t.id === id);
+                        }
+
+                        const age = parseFloat(this.formData[p].age) || 0;
+                        const mcv = parseFloat(lab.mcv);
+                        const mch = parseFloat(lab.mch);
+                        const hba = parseFloat(lab.hba) || 0;
+                        const hba2 = parseFloat(lab.hba2) || 0;
+                        const hbf = parseFloat(lab.hbf) || 0;
+                        let hbe = 0;
+                        if (lab.hbeLogic === 'combined') {
+                            hbe = parseFloat(lab.hba2e) || 0;
+                        } else if (lab.hbeLogic === 'separate') {
+                            hbe = parseFloat(lab.hbe_sep) || 0;
+                        }
+                        const hbcs = parseFloat(lab.hbcs) || 0;
+                        const hbbart = parseFloat(lab.hbbart) || 0;
+                        const hbh = parseFloat(lab.hbh) || 0;
+                        
+                        const b = {
+                            A: hba > 0, A2: hba2 > 0, F: hbf > 0, E: hbe > 0,
+                            CS: hbcs > 0 || lab.hbcs === 'Positive',
+                            Bart: hbbart > 0 || lab.hbbart === 'Positive',
+                            H: hbh > 0 || lab.hbh === 'Positive'
+                        };
+
+                        const l = {
+                            a2: [], e: [], f: [], of: [], dcip: [], mcv: [], mch: [], age: [], h: [], barts: [], cs: []
+                        };
+
+                        if (hba2 <= 3.5) l.a2.push('le_3.5');
+                        if (hba2 >= 3.6 && hba2 <= 8.0) l.a2.push('3.6_to_8.0');
+                        if (hbe > 0) l.e.push('present');
+                        if (hbe === 0) l.e.push('absent');
+                        if (hbe >= 25) l.e.push('ge_25');
+                        if (hbe > 0 && hbe < 25) l.e.push('lt_25');
+                        if (hbe >= 80) l.e.push('ge_80');
+                        if (hbe > 75) l.e.push('gt_75');
+                        if (hbe >= 40 && hbe <= 80) l.e.push('40_to_80');
+
+                        if (hbf > 0) l.f.push('present');
+                        if (hbf === 0) l.f.push('absent');
+                        if (hbf <= 5) l.f.push('le_5');
+                        if (hbf > 5) l.f.push('gt_5');
+                        if (hbf >= 10 && hbf <= 30) l.f.push('10_to_30');
+                        if (hbf >= 20 && hbf <= 60) l.f.push('20_to_60');
+
+                        l.of.push(lab.of ? lab.of.toLowerCase() : 'unknown');
+                        l.dcip.push(lab.dcip ? lab.dcip.toLowerCase() : 'unknown');
+                        
+                        if (!isNaN(mcv)) l.mcv.push(mcv < 80 ? 'lt_80' : 'ge_80');
+                        if (!isNaN(mch)) l.mch.push(mch < 27 ? 'lt_27' : 'ge_27');
+                        
+                        l.age.push(age > 1 ? 'gt_1_year' : 'le_1_year');
+
+                        l.h.push(b.H ? 'present' : 'absent');
+                        l.barts.push(b.Bart ? 'present' : 'absent');
+                        l.cs.push(b.CS ? 'present' : 'absent');
+
+                        const hasA = b.A;
+
+                        const rules = [
+                            // Rule 1 ใช้ค่าปกติทั้งหมดเพื่อระบุว่าเป็น Normal
+                            { id: 1, a2: 'le_3.5', e: 'na', f: 'na', of: 'negative', dcip: 'negative', mcv: 'ge_80', mch: 'ge_27', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            // Rule 2 จะดักจับกรณีที่ A2 <= 3.5 แต่มีค่า screening ตัวใดตัวหนึ่งผิดปกติ (ทำหน้าที่แยก 1 กับ 2)
+                            { id: 2, a2: 'le_3.5', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            // ตั้งแต่ Rule 3 เป็นต้นไป จะไม่สนใจ OF, DCIP, MCV, MCH อีกต่อไป (ตั้งค่าเป็น 'any')
+                            { id: 3, a2: '3.6_to_8.0', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 4, a2: 'na', e: 'ge_25', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 5, a2: 'na', e: 'lt_25', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 6, a2: 'na', e: 'ge_80', f: 'le_5', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 7, a2: 'na', e: 'gt_75', f: 'gt_5', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 8, a2: 'na', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'present' },
+                            { id: 9, a2: 'na', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'present' },
+                            { id: 10, a2: 'na', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'present', barts: 'any', cs: 'absent' },
+                            { id: 11, a2: 'na', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'present', barts: 'any', cs: 'present' },
+                            { id: 12, a2: 'na', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'gt_1_year', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 13, a2: 'na', e: '40_to_80', f: '20_to_60', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 14, a2: 'na', e: 'na', f: '10_to_30', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 15, a2: 'na', e: 'present', f: 'present', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
+                            { id: 16, a2: 'na', e: 'present', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'absent', reqA: true },
+                            { id: 17, a2: 'na', e: 'present', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'absent', reqA: false },
+                            { id: 18, a2: 'na', e: 'present', f: 'present', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'absent' },
+                            { id: 19, a2: 'na', e: 'present', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'present', reqA: true },
+                            { id: 20, a2: 'na', e: 'present', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'present', reqA: false },
+                            { id: 21, a2: 'na', e: 'present', f: 'present', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'present', cs: 'present' }
+                        ];
+
+                        const match = (req, activeList, isUnknownFlag) => {
+                            if (req === 'na' || req === 'any') return true;
+                            if (isUnknownFlag) return true; 
+                            return activeList.includes(req);
+                        };
+
+                        let matchedId = 22; 
+
+                        if (b.A || b.A2 || b.F || b.E || b.CS || b.Bart || b.H) {
+                            for (const r of rules) {
+                                if (r.reqA === true && !hasA) continue;
+                                if (r.reqA === false && hasA) continue;
+                                if (!match(r.a2, l.a2, false)) continue;
+                                if (!match(r.e, l.e, false)) continue;
+                                if (!match(r.f, l.f, false)) continue;
+                                if (!match(r.h, l.h, false)) continue;
+                                if (!match(r.barts, l.barts, false)) continue;
+                                if (!match(r.cs, l.cs, false)) continue;
+                                if (!match(r.of, l.of, l.of.includes('unknown'))) continue;
+                                if (!match(r.dcip, l.dcip, l.dcip.includes('unknown'))) continue;
+                                if (!match(r.mcv, l.mcv, l.mcv.length === 0)) continue;
+                                if (!match(r.mch, l.mch, l.mch.length === 0)) continue;
+                                if (!match(r.age, l.age, false)) continue;
+                                matchedId = r.id;
+                                break;
+                            }
+                        } else {
+                            return null; 
+                        }
+
+                        const res = this.thalLookup.find(t => t.id === matchedId) || this.thalLookup.find(t => t.id === 22);
+                        return { ...res, baseId: matchedId };
+                    } catch (e) {
+                        return null;
+                    }
+                },
+
+                interpretHbTyping(p) { 
+                    return this.evaluateTyping(this.labData[p], p); 
+                },
+
+                generateResult() {
+                    let r;
+                    if (this.flowType === 'quick') {
+                        r = this.quickRiskResult;
+                    } else {
+                        r = this.liveLabRiskResult;
+                    }
+                    
+                    if (r) {
+                        this.result.wife = { name: r.w.name, interpretation: r.w.interpretation || '-', type: r.w.type || '-' };
+                        this.result.husband = { name: r.h.name, interpretation: r.h.interpretation || '-', type: r.h.type || '-' };
+                        this.result.riskText = r.isAtRisk ? 'At Risk' : 'No Risk';
+                        this.result.dnaAlpha = r.riskBarts;
+                        this.result.dnaBeta = r.riskHomoBeta || r.riskBetaE;
+                        this.result.ready = true;
+                        this.goToStep(4);
+                    } else {
+                        alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+                    }
+                },
+
+                async generatePDF() {
+                    const fetchFontBase64 = async (url) => {
+                        const res = await fetch(url);
+                        if (!res.ok) throw new Error("Failed to fetch font: " + url);
+                        const blob = await res.blob();
+                        return new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                            reader.readAsDataURL(blob);
+                        });
+                    };
+
+                    try {
+                        const fNormal = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf';
+                        const fBold = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Bold.ttf';
+                        
+                        const [nb, bb] = await Promise.all([fetchFontBase64(fNormal), fetchFontBase64(fBold)]);
+                        pdfMake.vfs = pdfMake.vfs || {}; 
+                        pdfMake.vfs['SNormal.ttf'] = nb; 
+                        pdfMake.vfs['SBold.ttf'] = bb;
+                        pdfMake.fonts = { Sarabun: { normal: 'SNormal.ttf', bold: 'SBold.ttf' } };
+                    } catch (e) { 
+                        alert("โหลดฟอนต์สำหรับสร้าง PDF ไม่สำเร็จ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต"); 
+                        return; 
+                    }
+
+                    const logoBase64 = await fetch('https://sawee-hosp.github.io/th/logo.jpg').then(r => r.blob()).then(b => new Promise(resolve => { const reader = new FileReader(); reader.onloadend = () => resolve(reader.result); reader.readAsDataURL(b); })).catch(() => null);
+                    const d = new Date(); const mos = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                    const dateStr = `${d.getDate()} ${mos[d.getMonth()]} พ.ศ. ${d.getFullYear() + 543}`;
+                    
+                    const fmtPdfStr = (str) => {
+                        if(!str) return '-';
+                        return str.replace(/α/g, 'Alpha ').replace(/β/g, 'Beta ');
+                    };
+                    const fmt = (v) => (v && v !== 'Unknown' && v !== '') ? v.toString() : '-';
+                    const chkIcon = (condition) => ({ text: condition ? '[ x ]' : '[   ]' });
+
+                    let apptDateStr = this.formData.appointment.date;
+                    if (apptDateStr) {
+                        const parts = apptDateStr.split('-');
+                        if (parts.length === 3) apptDateStr = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                    const fmtApptDate = fmt(apptDateStr);
+                    
+                    const r = this.flowType === 'quick' ? this.quickRiskResult : this.liveLabRiskResult;
+                    if (!r) { alert("กรุณาระบุข้อมูลให้ครบถ้วนก่อนออกรายงาน"); return; }
+                    
+                    const needsAlpha = r.riskBarts;
+                    const needsBeta = r.riskHomoBeta || r.riskBetaE;
+                    const needsDNA = needsAlpha || needsBeta;
+
+                    const docDefinition = {
+                        pageSize: 'A4', pageMargins: [30, 20, 30, 20], defaultStyle: { font: 'Sarabun', fontSize: 11 },
+                        content: [
+                            { columns: [ { width: '*', margin: [0, 10, 0, 0], stack: [ { text: 'ศูนย์พัฒนาสู่ความเป็นเลิศการคัดกรองและวินิจฉัยก่อนคลอด', fontSize: 12, bold: true }, { text: 'โรคโลหิตจางธาลัสซีเมีย โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ', fontSize: 9, bold: true } ] }, { width: 160, image: logoBase64 || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', alignment: 'right' } ], margin: [0, 0, 0, 5] },
+                            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 535, y2: 0, lineWidth: 0.5, dash: { length: 2, space: 2 } }], margin:[0,0,0,5] },
+                            
+                            { text: 'แบบบันทึกการให้คำปรึกษาแก่คู่สมรสที่มีความเสี่ยงต่อการบุตรเป็นโรคธาลัสซีเมีย', alignment: 'center', bold: true, fontSize: 15, margin: [0, 5, 0, 10] },
+                            
+                            { columns: [
+                                { width: '45%', stack: [
+                                    { text: `วันที่ ....... ${dateStr} ......`, margin: [0, 0, 0, 10] },
+                                    { table: { widths: ['*'], body: [[{ text: [{text:'ภรรยา\n', bold:true}, `ชื่อ-สกุล : ${this.formData.wife.name} ${this.formData.wife.surname}\nอายุ: ${fmt(this.formData.wife.age)} ปี\nHN: ${fmt(this.formData.wife.hn)}`] }]] }, margin: [0,0,0,5] },
+                                    { table: { widths: ['*'], body: [[{ text: [{text:'สามี\n', bold:true}, `ชื่อ-สกุล : ${this.formData.husband.name} ${this.formData.husband.surname}\nอายุ: ${fmt(this.formData.husband.age)} ปี\nHN: ${fmt(this.formData.husband.hn)}`] }]] }, margin: [0,0,0,5] },
+                                    { table: { widths: ['*'], body: [[
+                                        { text: [
+                                            {text: 'Gravid: ', bold:true}, fmt(this.formData.pregnancy.gravid),
+                                            {text: '  Para: ', bold:true}, fmt(this.formData.pregnancy.para),
+                                            {text: '  Abortion: ', bold:true}, fmt(this.formData.pregnancy.abortion),
+                                            {text: '  Living: ', bold:true}, fmt(this.formData.pregnancy.living),
+                                            {text: '\nEDC: ', bold:true}, fmt(this.formData.pregnancy.edc),
+                                            {text: '   อายุครรภ์: ', bold:true}, fmt(this.formData.pregnancy.ga_weeks), ' สัปดาห์ ', fmt(this.formData.pregnancy.ga_days), ' วัน\n',
+                                            {text: 'ส่งมารับคำปรึกษาจาก  ', bold:true},
+                                            chkIcon(this.formData.pregnancy.hospital === 'Thammasat'), {text: ' รพ.ธรรมศาสตร์ฯ   '},
+                                            chkIcon(this.formData.pregnancy.hospital === 'Other'), {text: ' รพ.อื่นๆ '},
+                                            {text: this.formData.pregnancy.hospital === 'Other' && this.formData.pregnancy.history ? `(${this.formData.pregnancy.history})` : ''}
+                                        ]}
+                                    ]] }, margin: [0,0,0,5] },
+                                    { text: `ประวัติเพิ่มเติม : ${this.formData.pregnancy.hospital === 'Thammasat' && this.formData.pregnancy.history ? this.formData.pregnancy.history : '..........................................................'}`, margin: [0, 5, 0, 0] }
+                                ] },
+                                { width: '2%', text: '' },
+                                
+                                { width: '53%', table: { widths: ['34%', '33%', '33%'], body: this.buildLabTable(r) } }
+                            ] },
+                            
+                            {
+                                margin: [0, 15, 0, 15],
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [
+                                            {
+                                                border: [false, true, false, true],
+                                                padding: [0, 10, 0, 10],
+                                                stack: [
+                                                    { text: 'สรุปผลและคำแนะนำ', bold: true, fontSize: 13, margin: [0, 0, 0, 8] },
+                                                    { 
+                                                        columns: [
+                                                            { width: 10, text: '' },
+                                                            { 
+                                                                width: '*', 
+                                                                stack: [
+                                                                    { text: `- ความเสี่ยงของทารกในครรภ์ : ${r.isAtRisk ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'}`, margin: [0, 0, 0, 4] },
+                                                                    { text: `- การส่งตรวจยืนยัน ระดับ DNA : ${needsDNA ? '' : 'ไม่ต้องส่งตรวจเพิ่มเติม'}`, margin: [0, 2, 0, 2] },
+                                                                    ...(needsDNA ? [
+                                                                        { text: [ chkIcon(needsAlpha), {text: ' Alpha thalassemia 1'} ], margin: [15, 2, 0, 2] },
+                                                                        { text: [ chkIcon(needsBeta), {text: ' Beta mutation'} ], margin: [15, 2, 0, 2] }
+                                                                    ] : [])
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                }
+                            },
+                            
+                            { columns: [ { width: '50%', text: '' }, { width: '50%', stack: [ { text: 'ลงนาม ............................... แพทย์/พยาบาลผู้ให้คำปรึกษา' }, { text: `( ${this.result.consultant || '...............................'} )`, margin: [25, 5, 0, 0] } ] } ], margin: [0, 0, 0, 15] },
+                            { text: `นัดหมาย\tวันที่ ${fmtApptDate} \tอายุครรภ์ ....${fmt(this.formData.appointment.ga_weeks)}.... สัปดาห์ ....${fmt(this.formData.appointment.ga_days)}.... วัน\nหมายเหตุ ....${this.formData.appointment.remark || '....................................................................................................................'}....` }
+                        ]
+                    };
+                    pdfMake.createPdf(docDefinition).open();
+                },
+
+                buildLabTable(r) {
+                    const fmtPdfStr = (str) => { if(!str) return '-'; return str.replace(/α/g, 'Alpha ').replace(/β/g, 'Beta '); };
+                    const chkIcon = (condition) => ({ text: condition ? '[ x ]' : '[   ]' });
+                    const fmt = (v) => (v && v !== 'Unknown' && v !== '') ? v.toString() : '-';
+
+                    let tbody = [
+                        [{text:'รายการตรวจ', bold:true, alignment:'center'},{text:'ภรรยา', bold:true, alignment:'center'},{text:'สามี', bold:true, alignment:'center'}]
+                    ];
+
+                    if (this.flowType === 'lab') {
+                        tbody.push(
+                            ['OF', {text:fmt(this.labData.wife.of), alignment:'center'}, {text:fmt(this.labData.husband.of), alignment:'center'}],
+                            ['DCIP', {text:fmt(this.labData.wife.dcip), alignment:'center'}, {text:fmt(this.labData.husband.dcip), alignment:'center'}],
+                            ['MCV', {text:fmt(this.labData.wife.mcv), alignment:'center'}, {text:fmt(this.labData.husband.mcv), alignment:'center'}],
+                            ['MCH', {text:fmt(this.labData.wife.mch), alignment:'center'}, {text:fmt(this.labData.husband.mch), alignment:'center'}],
+                            ['Hb A', {text:fmt(this.labData.wife.hba), alignment:'center'}, {text:fmt(this.labData.husband.hba), alignment:'center'}],
+                            ['Hb F', {text:fmt(this.labData.wife.hbf), alignment:'center'}, {text:fmt(this.labData.husband.hbf), alignment:'center'}],
+                            ['Hb Cs', {text:fmt(this.labData.wife.hbcs), alignment:'center'}, {text:fmt(this.labData.husband.hbcs), alignment:'center'}],
+                            ['Hb Bart', {text:fmt(this.labData.wife.hbbart), alignment:'center'}, {text:fmt(this.labData.husband.hbbart), alignment:'center'}],
+                            [{text:[{text:'Hb A'},{text:'2', fontSize:9, sub:true}]}, {text:fmt(this.labData.wife.hba2), alignment:'center'}, {text:fmt(this.labData.husband.hba2), alignment:'center'}],
+                            [{text:[{text:'Hb A'},{text:'2', fontSize:9, sub:true},{text:'+E'}]}, {text:this.labData.wife.hbeLogic==='combined'?fmt(this.labData.wife.hba2e):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='combined'?fmt(this.labData.husband.hba2e):'-', alignment:'center'}],
+                            ['Hb E', {text:this.labData.wife.hbeLogic==='separate'?fmt(this.labData.wife.hbe_sep):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='separate'?fmt(this.labData.husband.hbe_sep):'-', alignment:'center'}]
+                        );
+                    }
+
+                    // Interpretation rows
+                    tbody.push(
+                        ['Hb Typing / DNA', {text: r.w ? fmtPdfStr(r.w.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}, {text: r.h ? fmtPdfStr(r.h.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}],
+                        ['Interpretation', {text: `${r.w && r.w.interpretation ? fmtPdfStr(r.w.interpretation) : '-'}\n(${r.w && r.w.type ? fmtPdfStr(r.w.type) : '-'})`, fontSize: 9, alignment: 'center'}, {text: `${r.h && r.h.interpretation ? fmtPdfStr(r.h.interpretation) : '-'}\n(${r.h && r.h.type ? fmtPdfStr(r.h.type) : '-'})`, fontSize: 9, alignment: 'center'}]
+                    );
+
+                    // แสดงผลความเสี่ยงของลูกเฉพาะหน้า DNA (Quick Flow) เท่านั้น
+                    if (this.flowType === 'quick') {
+                        tbody.push([
+                            { text: 'โรคที่เป็นความเสี่ยงของบุตร:', bold: true, colSpan: 3, fillColor: '#f8fafc', border: [true, true, true, false] }, {}, {}
+                        ]);
+                        tbody.push([
+                            { text: '', border: [true, false, false, true] },
+                            { 
+                                colSpan: 2, 
+                                border: [false, false, true, true],
+                                stack: [
+                                    { text: [chkIcon(r.riskBarts), " Hb Bart's Hydrops Fetalis"], margin: [0, 2] },
+                                    { text: [chkIcon(r.riskHomoBeta), " Homozygous Beta-thal"], margin: [0, 2] },
+                                    { text: [chkIcon(r.riskBetaE), " Beta-thal / Hb E"], margin: [0, 2] }
+                                ]
+                            },
+                            {}
+                        ]);
+                    }
+
+                    return tbody;
+                }
+            };
+        }
+    </script>
+
+    <!-- Essential Alpine script -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data="thalassemiaApp()" x-cloak>
+
+    <!-- App Navbar -->
+    <nav x-show="currentStep > 0" class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+        <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center no-print">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fas fa-dna text-lg"></i>
+                </div>
+                <span class="text-xl font-bold text-gray-800 tracking-tight hidden md:block">
+                    <span class="text-red-600">T</span>halassemia Unit, <span class="text-yellow-500">T</span>hammasart University Hospital
+                </span>
+                <span class="text-lg font-bold text-gray-800 tracking-tight md:hidden">
+                    <span class="text-red-600">T</span>halassemia Unit
+                </span>
+            </div>
+            
+            <div @click="currentStep = 0" class="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer transition text-gray-600 border border-gray-200">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="text-sm font-semibold">ออกจากระบบ</span>
+            </div>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div class="hidden md:flex justify-center items-center gap-8 text-sm py-3 border-b border-gray-100 bg-slate-50 no-print">
+            <div class="flex items-center gap-2 cursor-pointer transition-colors" :class="currentStep >= 1 ? 'step-active' : 'step-inactive'" @click="scrollToStep(1)">
+                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'">1</span>
+                ข้อมูลผู้ป่วย
+            </div>
+            <div class="w-8 h-[2px] bg-gray-200"></div>
+            <div class="flex items-center gap-2 cursor-pointer transition-colors" :class="currentStep >= 2 ? 'step-active' : 'step-inactive'" @click="scrollToStep(2)">
+                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'">2</span>
+                เลือกรูปแบบและกรอกข้อมูล
+            </div>
+            <div class="w-8 h-[2px] bg-gray-200"></div>
+            <div class="flex items-center gap-2 cursor-pointer transition-colors" :class="currentStep >= 4 ? 'step-active' : 'step-inactive'" @click="scrollToStep(4)">
+                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="currentStep >= 4 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'">3</span>
+                สรุปผล
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        
+        <!-- View: Login (Step 0) -->
+        <div x-show="currentStep === 0" class="min-h-screen flex flex-col items-center justify-center p-4">
+            <div class="bg-white/80 backdrop-blur-md p-10 rounded-2xl shadow-xl border border-white w-full max-w-sm text-center">
+                <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-dna text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2 tracking-tight">
+                    <span class="text-red-600 text-3xl">T</span>halassemia Unit<br>
+                    <span class="text-yellow-500 text-3xl">T</span>hammasart<br>University Hospital
+                </h2>
+                <p class="text-sm text-gray-500 mb-8 mt-2">เข้าสู่ระบบเพื่อประเมินความเสี่ยง</p>
+                
+                <div class="input-group"><input type="text" class="input-field" placeholder=" " value="admin"><label class="input-label">ชื่อผู้ใช้งาน</label></div>
+                <div class="input-group mt-4"><input type="password" class="input-field" placeholder=" " value="admin"><label class="input-label">รหัสผ่าน</label></div>
+                
+                <button @click="currentStep = 1" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md shadow-blue-500/20 font-semibold uppercase mt-8 tracking-wider text-sm transition active:scale-[0.98]">เข้าสู่ระบบ</button>
+            </div>
+        </div>
+
+        <div x-show="currentStep >= 1" class="pb-40">
+            <!-- 1. ข้อมูลผู้ป่วย (รวม ญ ช และตั้งครรภ์) -->
+            <div id="step1" class="max-w-6xl mx-auto w-full mt-8 p-4 md:p-6 space-y-6 animate-fadeIn">
+                <div class="mb-4">
+                    <h1 class="text-2xl font-bold text-gray-800">ข้อมูลผู้ป่วย</h1>
+                    <p class="text-gray-500 text-sm">กรุณากรอกข้อมูลของคู่สมรสและการตั้งครรภ์ปัจจุบัน</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="p-2 bg-pink-50 rounded-lg text-pink-600"><i class="fas fa-venus text-lg"></i></div>
+                            <h3 class="text-lg font-bold text-slate-800">หญิงตั้งครรภ์ (ภรรยา)</h3>
+                        </div>
+                        <div class="space-y-4 flex-1">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.wife.name" class="input-field" placeholder=" "><label class="input-label">ชื่อ</label></div>
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.wife.surname" class="input-field" placeholder=" "><label class="input-label">นามสกุล</label></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group !mt-0"><input type="number" x-model="formData.wife.age" class="input-field" placeholder=" "><label class="input-label">อายุ (ปี)</label></div>
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.wife.hn" class="input-field" placeholder=" "><label class="input-label">รหัสประจำตัวผู้ป่วย (HN)</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
+                        <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i class="fas fa-mars text-lg"></i></div>
+                            <h3 class="text-lg font-bold text-slate-800">สามี</h3>
+                        </div>
+                        <div class="space-y-4 flex-1">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.husband.name" class="input-field" placeholder=" "><label class="input-label">ชื่อ</label></div>
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.husband.surname" class="input-field" placeholder=" "><label class="input-label">นามสกุล</label></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group !mt-0"><input type="number" x-model="formData.husband.age" class="input-field" placeholder=" "><label class="input-label">อายุ (ปี)</label></div>
+                                <div class="input-group !mt-0"><input type="text" x-model="formData.husband.hn" class="input-field" placeholder=" "><label class="input-label">รหัสประจำตัวผู้ป่วย (HN)</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i class="fas fa-baby text-xl"></i></div>
+                        <h3 class="text-lg font-bold text-slate-800">ข้อมูลการตั้งครรภ์</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.gravid" class="input-field bg-slate-50" placeholder=" "><label class="input-label">ครรภ์ที่ (Gravid)</label></div>
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.para" class="input-field bg-slate-50" placeholder=" "><label class="input-label">คลอด (Para)</label></div>
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.abortion" class="input-field bg-slate-50" placeholder=" "><label class="input-label">แท้ง (Abortion)</label></div>
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.living" class="input-field bg-slate-50" placeholder=" "><label class="input-label">บุตรมีชีวิต (Living)</label></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="input-group !mt-0"><input type="date" x-model="formData.pregnancy.edc" class="input-field" placeholder=" "><label class="input-label">กำหนดคลอด (EDC)</label></div>
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.ga_weeks" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์ (สัปดาห์)</label></div>
+                        <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.ga_days" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์ (วัน)</label></div>
+                    </div>
+                    
+                    <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <span class="block text-sm font-semibold text-slate-700 mb-3">ส่งมารับคำปรึกษาจาก:</span>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-blue-400 transition">
+                                <input type="radio" x-model="formData.pregnancy.hospital" value="Thammasat" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> 
+                                <span class="text-sm font-medium text-slate-700">โรงพยาบาลธรรมศาสตร์ฯ</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-blue-400 transition">
+                                <input type="radio" x-model="formData.pregnancy.hospital" value="Other" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> 
+                                <span class="text-sm font-medium text-slate-700">โรงพยาบาลอื่นๆ</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <textarea x-model="formData.pregnancy.history" class="input-field h-24 resize-none" placeholder=" "></textarea>
+                        <label class="input-label">ประวัติเพิ่มเติม</label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-4" x-show="currentStep === 1">
+                    <!-- ข้ามไปที่ Step 3 เพื่อโชว์ฟอร์มและ Tab ทันที -->
+                    <button @click="goToStep(3, 'lab')" class="flex items-center gap-2 px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md font-semibold transition active:scale-[0.98]">
+                        ถัดไป: เลือกรูปแบบการประเมิน <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. เลือกรูปแบบการประเมิน แบบ Tab -->
+            <div x-show="currentStep >= 2" id="step3_tab_container" class="max-w-6xl mx-auto w-full px-4 md:px-6 pt-6">
+                
+                <!-- Tab Headers -->
+                <div class="flex flex-col sm:flex-row mb-0 relative z-10">
+                    <button @click="goToStep(3, 'lab')" 
+                            class="px-6 py-4 rounded-t-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 border-t-2 border-x-2 border-b-2 sm:border-b-0 sm:-mb-[2px]" 
+                            :class="flowType === 'lab' ? 'bg-white text-blue-700 border-blue-500 sm:border-b-white z-20' : 'bg-slate-100 text-slate-500 border-transparent hover:bg-slate-200 border-b-transparent'">
+                        <i class="fas fa-vials"></i> Hb Typing และคำแนะนำคู่เสี่ยง
+                    </button>
+                    <button @click="goToStep(3, 'quick')" 
+                            class="px-6 py-4 rounded-t-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 border-t-2 border-x-2 border-b-2 sm:border-b-0 sm:-mb-[2px] mt-2 sm:mt-0 sm:ml-2" 
+                            :class="flowType === 'quick' ? 'bg-white text-blue-700 border-blue-500 sm:border-b-white z-20' : 'bg-slate-100 text-slate-500 border-transparent hover:bg-slate-200 border-b-transparent'">
+                        <i class="fas fa-dna"></i> ประเมินโรคของลูกเมื่อทราบ DNA
+                    </button>
+                </div>
+
+                <!-- 3. ฟอร์มกรอกข้อมูล และ การแปลผล (เนื้อหาภายใน Tab) -->
+                <div class="bg-white border-2 border-blue-500 rounded-b-xl rounded-tr-xl p-4 md:p-6 shadow-sm relative z-0" x-show="currentStep >= 3">
+                    
+                    <!-- ================== LAB FLOW ================== -->
+                    <div x-show="flowType === 'lab'" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                        <template x-for="p in ['wife', 'husband']" :key="p">
+                            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col transition-all h-full">
+                                <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
+                                    <div class="p-2 rounded-lg" :class="p === 'wife' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'">
+                                        <i class="fas" :class="p === 'wife' ? 'fa-venus' : 'fa-mars'"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-slate-800" x-text="p === 'wife' ? 'ผลการตรวจของภรรยา' : 'ผลการตรวจของสามี'"></h3>
+                                </div>
+
+                                <div class="p-6 flex-1 space-y-6">
+                                    <!-- ทราบผลการวินิจฉัยแล้ว -->
+                                    <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 transition-all">
+                                        <label :for="'k_'+p" class="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" :id="'k_'+p" x-model="labData[p].knowOrder" class="w-5 h-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500">
+                                            <span class="font-semibold text-blue-800 text-sm">ทราบผลการวินิจฉัย (Hb Typing) สำเร็จรูปแล้วหรือไม่?</span>
+                                        </label>
+                                        <div x-show="labData[p].knowOrder" class="mt-3 animate-fadeIn">
+                                            <select x-model="labData[p].orderType" class="input-field !py-2.5 text-sm font-medium border-blue-300">
+                                                <option value="">-- เลือกผลการวินิจฉัย --</option>
+                                                <template x-for="opt in thalLookup" :key="opt.id">
+                                                    <option :value="opt.id" x-text="opt.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- ซ่อนการกรอกผล Lab หาก tick ว่าทราบแล้ว -->
+                                    <div x-show="!labData[p].knowOrder" class="space-y-6 animate-fadeIn">
+                                        <div class="space-y-4">
+                                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">การตรวจคัดกรอง (Screening Tests)</h4>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="group-box !mt-0"><span class="group-label">OF Test</span>
+                                                    <div class="flex justify-between mt-2 text-xs font-semibold text-slate-600">
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Positive" x-model="labData[p].of"> +ve</label>
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Negative" x-model="labData[p].of"> -ve</label>
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Unknown" x-model="labData[p].of"> N/A</label>
+                                                    </div>
+                                                </div>
+                                                <div class="group-box !mt-0"><span class="group-label">DCIP</span>
+                                                    <div class="flex justify-between mt-2 text-xs font-semibold text-slate-600">
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Positive" x-model="labData[p].dcip"> +ve</label>
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Negative" x-model="labData[p].dcip"> -ve</label>
+                                                        <label class="flex items-center gap-1 cursor-pointer hover:text-blue-600"><input type="radio" value="Unknown" x-model="labData[p].dcip"> N/A</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].mcv"><label class="input-label">MCV (fL)</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].mch"><label class="input-label">MCH (pg)</label></div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="border-slate-100">
+
+                                        <div class="space-y-4">
+                                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">ปริมาณฮีโมโกลบิน (Hb Quantitation %)</h4>
+                                            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hba"><label class="input-label">Hb A</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hba2"><label class="input-label">Hb A₂</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbf"><label class="input-label">Hb F</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbcs"><label class="input-label">Hb Cs</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbbart"><label class="input-label">Hb Bart</label></div>
+                                                <div class="input-group !mt-0"><input type="text" class="input-field" placeholder=" " x-model="labData[p].hbh"><label class="input-label">Hb H</label></div>
+                                            </div>
+                                            
+                                            <div class="group-box bg-slate-50 border-slate-200 !mt-2">
+                                                <span class="group-label">รูปแบบการกรอกค่า Hb E</span>
+                                                <div class="flex flex-wrap gap-4 mt-1 mb-3 text-sm font-medium text-slate-700">
+                                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" value="separate" x-model="labData[p].hbeLogic" class="text-blue-600"> แยกค่า</label>
+                                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" value="combined" x-model="labData[p].hbeLogic" class="text-blue-600"> รวมค่า (A₂+E)</label>
+                                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" value="none" x-model="labData[p].hbeLogic" class="text-blue-600"> ไม่มี</label>
+                                                </div>
+                                                
+                                                <div x-show="labData[p].hbeLogic === 'combined'" class="input-group animate-fadeIn"><input type="text" class="input-field bg-white" placeholder=" " x-model="labData[p].hba2e"><label class="input-label">ค่าของ %Hb E + %Hb A₂</label></div>
+                                                <div x-show="labData[p].hbeLogic === 'separate'" class="grid grid-cols-2 gap-4 animate-fadeIn">
+                                                    <div class="input-group !mt-0"><input type="text" class="input-field bg-slate-100 text-slate-500 font-medium" placeholder=" " x-model="labData[p].hba2" disabled><label class="input-label">A₂ (อ้างอิง)</label></div>
+                                                    <div class="input-group !mt-0"><input type="text" class="input-field bg-white" placeholder=" " x-model="labData[p].hbe_sep"><label class="input-label">ค่าของ %Hb E</label></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- การแปลผล (Interpreted Type) -->
+                                <div class="bg-slate-800 text-white px-6 py-4 mt-auto">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">การแปลผล (Interpreted Type)</div>
+                                            <div class="text-sm md:text-base font-bold text-blue-300 leading-tight" x-text="interpretHbTyping(p) ? (interpretHbTyping(p).name) : 'รอการกรอกข้อมูล...'"></div>
+                                            <div class="text-xs text-slate-400 mt-1" x-show="interpretHbTyping(p)" x-text="interpretHbTyping(p)?.interpretation"></div>
+                                        </div>
+                                        <div class="text-right border-l border-slate-600 pl-4 ml-4" x-show="!labData[p].knowOrder">
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">รวม %</div>
+                                            <div class="text-xl font-bold" :class="getTotal(p) > 100 ? 'text-red-400' : 'text-white'" x-text="getTotal(p) + '%'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- ================== QUICK FLOW (DNA / Disease Flow) ================== -->
+                    <div x-show="flowType === 'quick'" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                        <template x-for="p in ['wife', 'husband']" :key="p">
+                            <div class="bg-white p-6 rounded-2xl border flex flex-col h-full" :class="p === 'wife' ? 'border-pink-200 border-t-4 border-t-pink-500' : 'border-blue-200 border-t-4 border-t-blue-500'">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="p-2 rounded-lg" :class="p === 'wife' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'"><i class="fas fa-user-md"></i></div>
+                                    <h3 class="text-lg font-bold text-slate-800" x-text="p === 'wife' ? 'ผลการวินิจฉัยของภรรยา' : 'ผลการวินิจฉัยของสามี'"></h3>
+                                </div>
+                                <select x-model="quickCalc[p + 'Val']" class="input-field !py-3 text-sm font-semibold bg-slate-50 mb-4 cursor-pointer border-slate-300">
+                                    <option value="">-- กรุณาเลือกผลการวินิจฉัย (DNA) --</option>
+                                    <template x-for="opt in dnaLookup" :key="opt.id">
+                                        <option :value="opt.id" x-text="opt.name"></option>
+                                    </template>
+                                </select>
+                                <div class="mt-auto pt-4">
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">ยีนแฝงจากผลการวินิจฉัย</div>
+                                    <div x-show="quickCalc[p + 'Val']" class="flex gap-2 flex-wrap animate-fadeIn">
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_Alpha1 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">α-thal 1</span>
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_Beta ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">β-thal</span>
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_HbE ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">Hb E</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- ป้ายสรุปความเสี่ยง Live Risk Summary (โชว์ที่ด้านล่างสุดของฟอร์มเสมอ) -->
+                    <div class="mt-8 animate-fadeIn pt-4 border-t border-slate-200">
+                        
+                        <!-- === LAB FLOW RISK SUMMARY (แสดงเฉพาะหน้า Hb Typing) === -->
+                        <div x-show="flowType === 'lab' && liveLabRiskResult" class="rounded-xl border overflow-hidden" :class="liveLabRiskResult?.isAtRisk ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'">
+                            <div class="p-4 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                                <div class="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-md flex-shrink-0" :class="liveLabRiskResult?.isAtRisk ? 'bg-red-500 shadow-red-500/40' : 'bg-emerald-500 shadow-emerald-500/40'">
+                                    <i class="fas text-3xl" :class="liveLabRiskResult?.isAtRisk ? 'fa-exclamation-triangle' : 'fa-check'"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500 mb-1">สรุปความเสี่ยงทารกในครรภ์</h2>
+                                    <h1 class="text-2xl font-black" :class="liveLabRiskResult?.isAtRisk ? 'text-red-600' : 'text-emerald-600'" x-text="liveLabRiskResult?.isAtRisk ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'"></h1>
+                                </div>
+                                
+                                <!-- สรุปการตรวจ DNA ที่ต้องทำ -->
+                                <div class="bg-white/80 p-3 rounded-lg border text-left w-full md:w-auto mt-4 md:mt-0 shadow-sm" :class="liveLabRiskResult?.isAtRisk ? 'border-red-200' : 'border-emerald-200'">
+                                    <h3 class="text-xs font-bold text-slate-700 mb-1"><i class="fas fa-microscope text-blue-500 mr-1"></i> การส่งตรวจยืนยันระดับ DNA:</h3>
+                                    
+                                    <ul x-show="liveLabRiskResult?.riskBarts || liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE" class="text-sm font-semibold text-red-700 space-y-1 ml-5 list-disc">
+                                        <li x-show="liveLabRiskResult?.riskBarts">Alpha thalassemia 1</li>
+                                        <li x-show="liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE">Beta mutation</li>
+                                    </ul>
+                                    
+                                    <div x-show="!(liveLabRiskResult?.riskBarts || liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE)" class="text-sm font-semibold text-emerald-600 ml-2 mt-1">
+                                        <i class="fas fa-check-circle mr-1"></i> ไม่ต้องส่งตรวจเพิ่มเติม
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- === QUICK FLOW RISK SUMMARY (แสดงเฉพาะหน้า DNA - โชว์ 3 โรคเท่านั้น) === -->
+                        <div x-show="flowType === 'quick' && quickRiskResult" class="rounded-xl border border-blue-200 bg-white overflow-hidden shadow-sm">
+                            <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-2">
+                                <i class="fas fa-stethoscope text-blue-500"></i>
+                                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-700">สรุปความเสี่ยงโรคธาลัสซีเมียชนิดรุนแรงของทารกในครรภ์</h2>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <!-- Disease 1: Hb Bart's -->
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBarts ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">1. โรค Hb Bart's Hydrops Fetalis</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBarts ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                </div>
+                                <!-- Disease 2: Homozygous Beta -->
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskHomoBeta ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">2. โรค Homozygous β-thalassemia</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskHomoBeta ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                </div>
+                                <!-- Disease 3: Beta / Hb E -->
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBetaE ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">3. โรค β-thalassemia / Hb E</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBetaE ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end pt-6">
+                            <button @click="generateResult()" class="flex items-center gap-2 px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md font-bold transition active:scale-[0.98]">
+                                ดำเนินการออกรายงาน <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 4. ฟอร์มนัดหมายและออกรายงาน -->
+            <div x-show="currentStep >= 4 && result.ready" id="step4_lab" class="max-w-6xl mx-auto w-full px-4 md:px-6 pb-20 animate-fadeIn mt-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2"><i class="fas fa-calendar-alt text-lg text-slate-500"></i><h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest">ข้อมูลการนัดหมายและการออกรายงาน</h3></div>
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="input-group !mt-0"><input type="text" x-model="result.consultant" class="input-field" placeholder=" "><label class="input-label">ชื่อผู้ให้คำปรึกษา</label></div>
+                            <div class="input-group !mt-0"><input type="date" x-model="formData.appointment.date" class="input-field" placeholder=" "><label class="input-label">วันที่นัดหมายครั้งถัดไป</label></div>
+                            <div class="input-group"><input type="number" x-model="formData.appointment.ga_weeks" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์วันนัด (สัปดาห์)</label></div>
+                            <div class="input-group"><input type="number" x-model="formData.appointment.ga_days" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์วันนัด (วัน)</label></div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <span class="block text-sm font-semibold text-slate-700 mb-3">การมาพบแพทย์:</span>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-blue-400 transition text-sm">
+                                    <input type="radio" x-model="formData.appointment.attendance" value="Wife Only" class="text-blue-600"> ภรรยาคนเดียว
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-blue-400 transition text-sm">
+                                    <input type="radio" x-model="formData.appointment.attendance" value="Husband Only" class="text-blue-600"> สามีคนเดียว
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-blue-400 transition text-sm">
+                                    <input type="radio" x-model="formData.appointment.attendance" value="Both" class="text-blue-600"> มาพร้อมกันทั้งคู่
+                                </label>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="input-group"><textarea x-model="formData.appointment.remark" class="input-field h-24 resize-none" placeholder=" "></textarea><label class="input-label">หมายเหตุ</label></div>
+                            <div class="input-group"><textarea x-model="formData.appointment.additional_info" class="input-field h-24 resize-none" placeholder=" "></textarea><label class="input-label">ข้อมูลเพิ่มเติม</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Footer -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 no-print">
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button @click="location.reload()" class="flex-1 sm:flex-none px-4 py-2.5 text-slate-500 font-semibold text-sm hover:bg-rose-50 hover:text-rose-600 rounded-lg transition flex items-center justify-center gap-2"><i class="fas fa-undo"></i> เริ่มผู้ป่วยใหม่</button>
+                    </div>
+                    <button @click="generatePDF()" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-500/30 font-bold uppercase tracking-wide transition active:scale-[0.98] flex items-center justify-center gap-2 text-sm">
+                        <i class="fas fa-print"></i> พิมพ์รายงาน (PDF)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ข้อสงวนสิทธิ์ Footer (ไม่มีในหน้าพิมพ์) -->
+        <footer x-show="currentStep > 0" class="mt-auto py-8 px-4 text-center text-xs text-slate-500 bg-white/50 backdrop-blur-sm border-t border-slate-200 no-print">
+            <p class="font-semibold text-slate-700 mb-2 text-sm">จัดทำโดย ศูนย์พัฒนาสู่ความเป็นเลิศการคัดกรองและวินิจฉัยก่อนคลอด โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</p>
+            <p class="max-w-3xl mx-auto leading-relaxed">
+                <strong>ข้อสงวนสิทธิ์ (Disclaimer):</strong> ระบบนี้ถูกออกแบบมาเพื่อเป็นเครื่องมือช่วยบุคลากรทางการแพทย์ในการประเมินความเสี่ยงเบื้องต้นเท่านั้น ไม่สามารถใช้ทดแทนการตรวจทางห้องปฏิบัติการหรือการวินิจฉัยโดยแพทย์ผู้เชี่ยวชาญได้
+            </p>
+            <p class="max-w-3xl mx-auto leading-relaxed mt-1 text-rose-600 font-medium">
+                * ระบบนี้ <strong>ไม่มีการบันทึกหรือจัดเก็บข้อมูลส่วนบุคคล</strong> ของผู้ใช้งานลงในฐานข้อมูลใดๆ ทั้งสิ้น ข้อมูลทั้งหมดจะสูญหายทันทีเมื่อมีการปิดหน้าต่างเบราว์เซอร์
+            </p>
+        </footer>
+
+    </div>
+</body>
+</html>
