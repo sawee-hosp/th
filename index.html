@@ -85,46 +85,106 @@
                 flowType: 'lab', 
                 
                 // สำหรับ Tab 1: Hb Typing (Lab Flow)
+                // เพิ่ม isBetaUnknown: False(รู้แน่ชัด) / True(สงสัย/แยกไม่ได้)
                 thalLookup: [
-                    { id: 1, name: "1. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal or non clinically significant thalassemia", type: "พาหะ α-thalassemia 2", has_Alpha1: false, has_Beta: false, has_HbE: false },
-                    { id: 2, name: "2. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal Hb typing, not rule out α-thalassemia", type: "พาหะ α-thalassemia 1, พาหะ α-thal 2 หรือ hom α-thal 2", has_Alpha1: true, has_Beta: false, has_HbE: false },
-                    { id: 3, name: "3. A₂A, Hb A₂ 3.6-8%", interpretation: "β-thalassemia trait w/wo α-thalassemia", type: "β-thalassemia trait w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: false },
-                    { id: 4, name: "4. EA, Hb E ≥ 25%", interpretation: "Hb E trait", type: "Hb E trait", has_Alpha1: false, has_Beta: false, has_HbE: true },
-                    { id: 5, name: "5. EA, Hb E < 25%", interpretation: "Hb E trait w/wo α-thalassemia", type: "Hb E trait w/wo α-thalassemia", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 6, name: "6. EE, Hb E ≥ 80% Hb F ≤ 5%", interpretation: "Homozygous Hb E w/wo α-thalassemia", type: "Homozygous Hb E w/wo α-thalassemia", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 7, name: "7. EE/EF, Hb E > 75% Hb F > 5%", interpretation: "suspected homozygous Hb E or β-thal/Hb E", type: "suspected homozygous Hb E or β-thalassemia/Hb E", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 8, name: "8. CS A₂A", interpretation: "suspected Hb Constant Spring", type: "Hb Constant Spring trait", has_Alpha1: false, has_Beta: false, has_HbE: false },
-                    { id: 9, name: "9. CS A₂A Bart's", interpretation: "suspected homozygous Hb Constant Spring", type: "Homozygous Hb Constant Spring", has_Alpha1: false, has_Beta: false, has_HbE: false },
-                    { id: 10, name: "10. A₂A H หรือ A₂A Bart's H", interpretation: "Hb H disease (α-thal 1 / α-thal 2)", type: "Hb H disease (α-thal 1 / α-thal 2)", has_Alpha1: true, has_Beta: false, has_HbE: false },
-                    { id: 11, name: "11. CS A₂A H หรือ CS A₂A Bart's H", interpretation: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", type: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", has_Alpha1: true, has_Beta: false, has_HbE: false },
-                    { id: 12, name: "12. A₂F", interpretation: "Homozygous β0-thalassemia w/wo α-thalassemia", type: "Homozygous β0-thalassemia w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: false },
-                    { id: 13, name: "13. EF Hb E 40-80%, Hb F 20-60%", interpretation: "suspected β0-thal/Hb E or HPFH/Hb E", type: "suspected β0-thalassemia/Hb E or HPFH/Hb E", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 14, name: "14. A₂FA, Hb F 10-30%", interpretation: "suspected β-thal disease or HPFH trait", type: "suspected β-thalassemia disease or HPFH trait", has_Alpha1: true, has_Beta: true, has_HbE: false },
-                    { id: 15, name: "15. EFA", interpretation: "β+-thalassemia/Hb E w/wo α-thalassemia", type: "β+-thalassemia/Hb E w/wo α-thalassemia", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 16, name: "16. EA Bart's", interpretation: "EA Bart's disease", type: "EA Bart's disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 17, name: "17. EE Bart's or EF Bart's", interpretation: "EF Bart's disease", type: "EF Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 18, name: "18. EFA Bart's", interpretation: "EFA Bart's disease", type: "EFA Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 19, name: "19. CS EA Bart's", interpretation: "CS EA Bart's disease", type: "CS EA Bart's disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 20, name: "20. CS EE Bart's หรือ CS EF Bart's", interpretation: "CS EF Bart's disease", type: "CS EF Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 21, name: "21. CS EFA Bart's", interpretation: "CS EFA Bart's disease", type: "CS EFA Bart's disease", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 22, name: "22. rare abnormal Hb", interpretation: "suspected abnormal Hb", type: "suspected abnormal Hb", has_Alpha1: true, has_Beta: true, has_HbE: true }
+                    { id: 1, name: "1. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal or non clinically significant thalassemia", type: "พาหะ α-thalassemia 2", isBetaUnknown: false },
+                    { id: 2, name: "2. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal Hb typing, not rule out α-thalassemia", type: "พาหะ α-thalassemia 1, พาหะ α-thal 2 หรือ hom α-thal 2", isBetaUnknown: false },
+                    { id: 3, name: "3. A₂A, Hb A₂ 3.6-8%", interpretation: "β-thalassemia trait w/wo α-thalassemia", type: "β-thalassemia trait w/wo α-thalassemia", isBetaUnknown: true },
+                    { id: 4, name: "4. EA, Hb E ≥ 25%", interpretation: "Hb E trait", type: "Hb E trait", isBetaUnknown: false },
+                    { id: 5, name: "5. EA, Hb E < 25%", interpretation: "Hb E trait w/wo α-thalassemia", type: "Hb E trait w/wo α-thalassemia", isBetaUnknown: false },
+                    { id: 6, name: "6. EE, Hb E ≥ 80% Hb F ≤ 5%", interpretation: "Homozygous Hb E w/wo α-thalassemia", type: "Homozygous Hb E w/wo α-thalassemia", isBetaUnknown: false },
+                    { id: 7, name: "7. EE/EF, Hb E > 75% Hb F > 5%", interpretation: "suspected homozygous Hb E or β-thal/Hb E", type: "suspected homozygous Hb E or β-thalassemia/Hb E", isBetaUnknown: true },
+                    { id: 8, name: "8. CS A₂A", interpretation: "suspected Hb Constant Spring", type: "Hb Constant Spring trait", isBetaUnknown: false },
+                    { id: 9, name: "9. CS A₂A Bart's", interpretation: "suspected homozygous Hb Constant Spring", type: "Homozygous Hb Constant Spring", isBetaUnknown: false },
+                    { id: 10, name: "10. A₂A H หรือ A₂A Bart's H", interpretation: "Hb H disease (α-thal 1 / α-thal 2)", type: "Hb H disease (α-thal 1 / α-thal 2)", isBetaUnknown: false },
+                    { id: 11, name: "11. CS A₂A H หรือ CS A₂A Bart's H", interpretation: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", type: "Hb H-CS disease (α-thal 1 / Hb Constant Spring)", isBetaUnknown: false },
+                    { id: 12, name: "12. A₂F", interpretation: "Homozygous β0-thalassemia w/wo α-thalassemia", type: "Homozygous β0-thalassemia w/wo α-thalassemia", isBetaUnknown: true },
+                    { id: 13, name: "13. EF Hb E 40-80%, Hb F 20-60%", interpretation: "suspected β0-thal/Hb E or HPFH/Hb E", type: "suspected β0-thalassemia/Hb E or HPFH/Hb E", isBetaUnknown: true },
+                    { id: 14, name: "14. A₂FA, Hb F 10-30%", interpretation: "suspected β-thal disease or HPFH trait", type: "suspected β-thalassemia disease or HPFH trait", isBetaUnknown: true },
+                    { id: 15, name: "15. EFA", interpretation: "β+-thalassemia/Hb E w/wo α-thalassemia", type: "β+-thalassemia/Hb E w/wo α-thalassemia", isBetaUnknown: true },
+                    { id: 16, name: "16. EA Bart's", interpretation: "EA Bart's disease", type: "EA Bart's disease", isBetaUnknown: false },
+                    { id: 17, name: "17. EE Bart's or EF Bart's", interpretation: "EF Bart's disease", type: "EF Bart's disease", isBetaUnknown: true },
+                    { id: 18, name: "18. EFA Bart's", interpretation: "EFA Bart's disease", type: "EFA Bart's disease", isBetaUnknown: true },
+                    { id: 19, name: "19. CS EA Bart's", interpretation: "CS EA Bart's disease", type: "CS EA Bart's disease", isBetaUnknown: false },
+                    { id: 20, name: "20. CS EE Bart's หรือ CS EF Bart's", interpretation: "CS EF Bart's disease", type: "CS EF Bart's disease", isBetaUnknown: true },
+                    { id: 21, name: "21. CS EFA Bart's", interpretation: "CS EFA Bart's disease", type: "CS EFA Bart's disease", isBetaUnknown: true },
+                    { id: 22, name: "22. rare abnormal Hb", interpretation: "suspected abnormal Hb", type: "suspected abnormal Hb", isBetaUnknown: true }
                 ],
 
-                // สำหรับ Tab 2: รายชื่อโรค/DNA 13 รายการ
-                dnaLookup: [
-                    { id: 1, name: "1. ปกติ / ไม่พบความเสี่ยงใดๆ", has_Alpha1: false, has_Beta: false, has_HbE: false },
-                    { id: 2, name: "2. α-thal 1 trait", has_Alpha1: true, has_Beta: false, has_HbE: false },
-                    { id: 3, name: "3. Hb H Disease", has_Alpha1: true, has_Beta: false, has_HbE: false },
-                    { id: 4, name: "4. β-thal trait", has_Alpha1: false, has_Beta: true, has_HbE: false },
-                    { id: 5, name: "5. Homozygous β-thal", has_Alpha1: false, has_Beta: true, has_HbE: false },
-                    { id: 6, name: "6. β-thal trait ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: false },
-                    { id: 7, name: "7. Homozygous β-thal ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: false },
-                    { id: 8, name: "8. Hb E trait หรือ Homozygous Hb E", has_Alpha1: false, has_Beta: false, has_HbE: true },
-                    { id: 9, name: "9. Hb E trait หรือ Homozygous Hb E ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 10, name: "10. β-thal / Hb E", has_Alpha1: false, has_Beta: true, has_HbE: true },
-                    { id: 11, name: "11. β-thal / Hb E ที่มี α-thal 1 ร่วมด้วย", has_Alpha1: true, has_Beta: true, has_HbE: true },
-                    { id: 12, name: "12. EA Bart's Disease", has_Alpha1: true, has_Beta: false, has_HbE: true },
-                    { id: 13, name: "13. EF Bart's Disease", has_Alpha1: true, has_Beta: true, has_HbE: true }
+                // สำหรับ Tab 2: รายชื่อ Alpha Mutations
+                alphaMutations: [
+                    { id: 'none', name: 'ไม่พบ', type: 'ปกติ' },
+                    { id: 'SEA', name: 'SEA', type: 'Alpha thal-1' },
+                    { id: 'THAI', name: 'THAI', type: 'Alpha thal-1' },
+                    { id: 'FIL', name: 'FIL', type: 'Alpha thal-1' },
+                    { id: 'MED', name: 'MED', type: 'Alpha thal-1' },
+                    { id: '20.5', name: '-20.5 kb', type: 'Alpha thal-1' },
+                    { id: 'Pakse', name: 'Pakse', type: 'Alpha thal-1' },
+                    { id: 'PNP', name: 'PNP (Pak Num Po)', type: 'Alpha thal-1' },
+                    { id: '3.7', name: '-3.7 kb', type: 'Alpha thal-2' },
+                    { id: '4.2', name: '-4.2 kb', type: 'Alpha thal-2' },
+                    { id: 'CS', name: 'CS (Constant spring)', type: 'Abnormal alpha' }
+                ],
+
+                // สำหรับ Tab 2: รายชื่อ Beta Mutations พร้อม alleleClass สำหรับ Punnett Square
+                betaMutations: [
+                    { id: 'none', name: 'ไม่พบ', severity: 'ปกติ', alleleClass: 'Normal' },
+                    { id: 'b_28', name: '-28 (A>G)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_30', name: '-30 (T>C)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_31', name: '-31 (A>G)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_50', name: '-50 (G>A)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_86', name: '-86 (C>G)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_87', name: '-87 (C>A)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_90', name: '-90 (C>T)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_p1', name: '+1 (A>C)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_init', name: 'Init. Codon (ATG>AGG)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd8_9', name: 'Codon 8/9 (+G)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd14_15', name: 'Codon 14/15 (+G)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd15', name: 'Codon 15 (-T)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd27_28', name: 'Codon 27/28 (+C)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd33_34', name: 'Codon 33/34 (-G)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd41', name: 'Codon 41 (-C)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd41_42', name: 'Codon 41/42 (-TTCT)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd71_72_t', name: 'Codon 71/72 (+T)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd71_72_a', name: 'Codon 71/72 (+A)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd95', name: 'Codon 95 (+A)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd121', name: 'Codon 121 (-G)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd123_125', name: 'Codon 123-125 (-ACCCCACC) (Hb Khonkaen)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd30', name: 'Codon 30 (AGG>ACG) or IVS I-1', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_1_gt', name: 'IVS I-1 (G>T)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_1_ga', name: 'IVS I-1 (G>A)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_2_tc', name: 'IVS I-2 (T>C)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_2_ta', name: 'IVS I-2 (T>A)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_5', name: 'IVS I-5 (G>C)', severity: 'รุนแรงน้อย (Severe β+)', alleleClass: 'Severe' },
+                    { id: 'b_ivs1_116', name: 'IVS I-116 (T>G)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_ivs2_654', name: 'IVS II-654 (C>T)', severity: 'รุนแรงน้อย (Severe β+)', alleleClass: 'Severe' },
+                    { id: 'b_ivs2_815', name: 'IVSII-815 (C>T)', severity: 'Unclear', alleleClass: 'Normal' },
+                    { id: 'b_cd19', name: 'Codon 19 (AAC>AGC) (Hb Malay)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_cd26', name: 'Codon 26 (GAG>AAG) (Hb E)', severity: 'Abnormal beta globin (β+)', alleleClass: 'E' },
+                    { id: 'b_e_udon', name: 'CD 26 (GAG>AAG), IVS I-7 (A>G) (Hb E-Udon Thani)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_e_ivs1_7', name: 'CD 26 (GAG>AAG), IVS I-7 (A>T)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_cd126', name: 'Codon 126 (GTG>GGG) (Hb Dhonburi or Hb Neapolis)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_cd15_tag', name: 'Codon 15 (TGG>TAG)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd17', name: 'Codon 17 (AAG>TAG)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd26_tag', name: 'Codon 26 (GAG>TAG)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd26_ga', name: 'Codon 26 (G>A) (Hb E)', severity: 'Abnormal beta globin', alleleClass: 'E' },
+                    { id: 'b_cd35', name: 'Codon 35 (TAC>TAA)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_cd43', name: 'Codon 43 (GAG>TAG)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_polyA', name: 'PolyA (AATAAA>AATAGA)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
+                    { id: 'b_0_105', name: 'β0-thalassemia (105 bp deletion)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_0_619', name: 'β0-thalassemia (619 bp Asian Indian deletion)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_0_thai', name: 'Thai β0-thalassemia (3485 bp deletion)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_0_prachin', name: 'Prachinburi β0-thalassemia (60 kb deletion)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_0_filipino', name: 'Filipino β0-thalassemia (118.5 kb deletion)', severity: 'รุนแรงมาก (βº)', alleleClass: 'Severe' },
+                    { id: 'b_db0_thai', name: 'Thai/Vietnamese/Laotian δβ0-thalassemia (12.6 kb deletion)', severity: 'รุนแรงมาก (δβº)', alleleClass: 'Severe' },
+                    { id: 'b_db0_thai_11', name: 'Thai δβ0-thalassemia (11.3 kb deletion)', severity: 'รุนแรงมาก (δβº)', alleleClass: 'Severe' },
+                    { id: 'b_agdb0_indian', name: 'Indian deletion-inversion Gγ(Aγδβ)0-thalassemia', severity: 'รุนแรงมาก (Aγδβº)', alleleClass: 'Severe' },
+                    { id: 'b_agdb0_chinese', name: 'Chinese Aγδβ0-thalassemia (78.9 kb deletion)', severity: 'รุนแรงมาก (Aγδβº)', alleleClass: 'Severe' },
+                    { id: 'b_agdb0_siriraj', name: 'Siriraj Aγδβ0-thalassemia (~118 kb deletion)', severity: 'รุนแรงมาก (Aγδβº)', alleleClass: 'Severe' },
+                    { id: 'b_agdb0_thai', name: 'Thai deletion-inversion-insertion Aγδβ0-thalassemia (118.3 kb deletion)', severity: 'รุนแรงมาก (Aγδβº)', alleleClass: 'Severe' },
+                    { id: 'b_hpfh6', name: 'HPFH-6 (79.3 kb deletion)', severity: 'HPFH', alleleClass: 'Normal' },
+                    { id: 'b_hpfh_sea', name: 'Vietnamese/ SEA HPFH (27 kb deletion)', severity: 'HPFH', alleleClass: 'Normal' },
+                    { id: 'b_lepore', name: 'Hb Lepore', severity: 'รุนแรงน้อย (δβ+)', alleleClass: 'Severe' }
                 ],
                 
                 labItems: ['OF', 'DCIP', 'MCV', 'MCH', 'Hb A', 'A₂', 'Hb F', 'Hb Cs', 'Hb Bart', 'Hb H'],
@@ -132,42 +192,196 @@
                 formData: {
                     wife: { name: '', surname: '', age: '', hn: '' },
                     husband: { name: '', surname: '', age: '', hn: '' },
-                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '', ga_weeks: '', ga_days: '', hospital: 'Thammasat', history: '' },
+                    pregnancy: { gravid: '', para: '', abortion: '', living: '', edc: '', ga_weeks: '', ga_days: '', hospital: 'Thammasat', history: '', pnd_method: 'CVS' },
                     appointment: { date: '', ga_weeks: '', ga_days: '', attendance: '', remark: '', additional_info: '' }
                 },
+
+                // สำหรับ Tab 1
                 labData: {
                     wife: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' },
                     husband: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', hbeLogic: 'separate', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hba2e: '', hbe_sep: '' }
                 },
                 
-                quickCalc: { wifeVal: '', husbandVal: '' },
-                result: { wife: null, husband: null, ready: false, riskText: '', dnaAlpha: false, dnaBeta: false, consultant: '' },
+                // สำหรับ Tab 2
+                dnaData: { 
+                    wife: { alpha1: 'none', alpha2: 'none', beta1: 'none', beta2: 'none' }, 
+                    husband: { alpha1: 'none', alpha2: 'none', beta1: 'none', beta2: 'none' } 
+                },
+
+                result: { wife: null, husband: null, ready: false, riskText: '', dnaAlpha: false, dnaBeta: false, consultantName: '' },
+                
+                consultants: [],
+                showConsultantDropdown: false,
+                showSigPad: false,
+                signatureData: null,
+
+                init() {
+                    this.loadConsultants();
+                },
+
+                loadConsultants() {
+                    const saved = localStorage.getItem('thal_consultants_list');
+                    if (saved) {
+                        this.consultants = JSON.parse(saved);
+                        if(this.consultants.length > 0 && !this.result.consultantName) {
+                            this.result.consultantName = this.consultants[0];
+                        }
+                    }
+                },
+                
+                saveConsultant() {
+                    if(!this.result.consultantName) return alert('กรุณาระบุชื่อผู้ให้คำปรึกษา');
+                    if(!this.consultants.includes(this.result.consultantName)) {
+                        this.consultants.push(this.result.consultantName);
+                        localStorage.setItem('thal_consultants_list', JSON.stringify(this.consultants));
+                    }
+                    this.showConsultantDropdown = false;
+                },
+                
+                deleteConsultant(name) {
+                    this.consultants = this.consultants.filter(c => c !== name);
+                    localStorage.setItem('thal_consultants_list', JSON.stringify(this.consultants));
+                    if(this.result.consultantName === name) {
+                        this.result.consultantName = '';
+                    }
+                },
+                
+                initSignaturePad() {
+                    this.showSigPad = !this.showSigPad;
+                    if (this.showSigPad) {
+                        setTimeout(() => {
+                            const canvas = document.getElementById('inlineSigCanvas');
+                            if (!canvas) return;
+                            const ctx = canvas.getContext('2d');
+                            ctx.lineWidth = 2;
+                            ctx.lineCap = 'round';
+                            ctx.strokeStyle = '#0f172a';
+                            
+                            let drawing = false;
+                            
+                            const getPos = (e) => {
+                                const rect = canvas.getBoundingClientRect();
+                                if (e.touches && e.touches.length > 0) {
+                                    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+                                }
+                                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                            };
+
+                            const startDraw = (e) => {
+                                drawing = true;
+                                const pos = getPos(e);
+                                ctx.beginPath();
+                                ctx.moveTo(pos.x, pos.y);
+                                e.preventDefault();
+                            };
+
+                            const draw = (e) => {
+                                if (!drawing) return;
+                                const pos = getPos(e);
+                                ctx.lineTo(pos.x, pos.y);
+                                ctx.stroke();
+                                e.preventDefault();
+                            };
+
+                            const endDraw = () => { drawing = false; };
+
+                            canvas.onmousedown = startDraw;
+                            canvas.onmousemove = draw;
+                            canvas.onmouseup = endDraw;
+                            canvas.onmouseout = endDraw;
+
+                            canvas.ontouchstart = startDraw;
+                            canvas.ontouchmove = draw;
+                            canvas.ontouchend = endDraw;
+                        }, 50);
+                    }
+                },
+                
+                saveSignature() {
+                    const canvas = document.getElementById('inlineSigCanvas');
+                    if (canvas) {
+                        this.signatureData = canvas.toDataURL();
+                    }
+                    this.showSigPad = false;
+                },
+                
+                clearSignature() {
+                    const canvas = document.getElementById('inlineSigCanvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                    this.signatureData = null;
+                },
+
+                // ฟังก์ชันคำนวณอายุครรภ์
+                calculateGA(edcDate, targetDate) {
+                    if (!edcDate || !targetDate) return { weeks: '', days: '' };
+                    const edc = new Date(edcDate);
+                    const target = new Date(targetDate);
+                    
+                    edc.setHours(0,0,0,0);
+                    target.setHours(0,0,0,0);
+
+                    // EDC = 40 weeks = 280 days from conception
+                    const diffTime = edc.getTime() - target.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    let totalGADays = 280 - diffDays;
+                    if (totalGADays < 0) totalGADays = 0;
+                    
+                    return {
+                        weeks: Math.floor(totalGADays / 7),
+                        days: totalGADays % 7
+                    };
+                },
+
+                updatePregnancyGA() {
+                    const today = new Date().toISOString().split('T')[0];
+                    const ga = this.calculateGA(this.formData.pregnancy.edc, today);
+                    this.formData.pregnancy.ga_weeks = ga.weeks;
+                    this.formData.pregnancy.ga_days = ga.days;
+                    this.updateAppointmentGA();
+                    this.updatePNDMethod();
+                },
+
+                updateAppointmentGA() {
+                    if(!this.formData.appointment.date) return;
+                    const ga = this.calculateGA(this.formData.pregnancy.edc, this.formData.appointment.date);
+                    if(ga.weeks !== '') {
+                        this.formData.appointment.ga_weeks = ga.weeks;
+                        this.formData.appointment.ga_days = ga.days;
+                    }
+                },
+                
+                updatePNDMethod() {
+                    const w = parseInt(this.formData.pregnancy.ga_weeks) || 0;
+                    if (w < 14) this.formData.pregnancy.pnd_method = 'CVS';
+                    else if (w >= 14 && w <= 18) this.formData.pregnancy.pnd_method = 'Amniocentesis';
+                    else this.formData.pregnancy.pnd_method = 'Cord blood sampling';
+                },
 
                 getRiskFromMatrix(wId, hId) {
-                    // 1. แบ่ง 22 ลำดับ ออกเป็น 5 กลุ่ม
                     const getGroup = (id) => {
                         const numId = parseFloat(id);
-                        if ([1].includes(numId)) return 1; // กลุ่ม 1: No Risk
-                        if ([2, 8, 9, 10, 11].includes(numId)) return 2; // กลุ่ม 2: Alpha Only
-                        if ([4].includes(numId)) return 3; // กลุ่ม 3: Beta/E Only
-                        if ([5, 6, 16, 19].includes(numId)) return 4; // กลุ่ม 4: Alpha + E
-                        // กลุ่ม 5: Alpha + Severe Beta (ปัด 20 เข้ากลุ่มนี้ตามคำแนะนำเพื่อเฝ้าระวังสูงสุด)
+                        if ([1].includes(numId)) return 1;
+                        if ([2, 8, 9, 10, 11].includes(numId)) return 2;
+                        if ([4].includes(numId)) return 3;
+                        if ([5, 6, 16, 19].includes(numId)) return 4;
                         if ([3, 7, 12, 13, 14, 15, 17, 18, 20, 21, 22].includes(numId)) return 5;
-                        return 5; // Default ค่าสูงสุดกรณีไม่ตรงเงื่อนไข
+                        return 5;
                     };
 
                     const wGroup = getGroup(wId);
                     const hGroup = getGroup(hId);
 
-                    // 2. ตาราง Logic Matrix 5x5 (Wife \ Husband)
-                    // รูปแบบ: [มีความเสี่ยง, ต้องตรวจ Alpha, ต้องตรวจ Beta]
                     const matrix = [
-                        [], // Index 0 ว่างไว้ เพื่อให้อ้างอิง index 1-5 ได้ตรงตัว
-                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [false, false, false] ], // กลุ่มภรรยา 1
-                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, false]   ], // กลุ่มภรรยา 2
-                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [true, false, true]   ], // กลุ่มภรรยา 3
-                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, true]    ], // กลุ่มภรรยา 4
-                        [ [], [false, false, false], [true, true, false],   [true, false, true],   [true, true, true],    [true, true, true]    ]  // กลุ่มภรรยา 5
+                        [],
+                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [false, false, false] ],
+                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, false]   ],
+                        [ [], [false, false, false], [false, false, false], [false, false, false], [false, false, false], [true, false, true]   ],
+                        [ [], [false, false, false], [true, true, false],   [false, false, false], [true, true, false],   [true, true, true]    ],
+                        [ [], [false, false, false], [true, true, false],   [true, false, true],   [true, true, true],    [true, true, true]    ]
                     ];
 
                     const [isAtRisk, needsAlpha, needsBeta] = matrix[wGroup][hGroup];
@@ -176,13 +390,13 @@
                         isAtRisk,
                         riskBarts: needsAlpha, 
                         riskHomoBeta: needsBeta, 
-                        riskBetaE: false // ให้ถือว่าต้องตรวจ Beta ครอบคลุมแล้ว
+                        riskBetaE: false
                     };
                 },
 
                 goToStep(step, type = null) {
                     if (step === 2 && this.currentStep < 2) {
-                        this.currentStep = 3; // ข้ามขั้นที่ 2 ให้เปิดฟอร์มทันที
+                        this.currentStep = 3; 
                         if(!this.flowType) this.flowType = 'lab';
                     } else if (step === 3) {
                         if (type) this.flowType = type;
@@ -215,11 +429,6 @@
                     }
                 },
 
-                getKey(item) { 
-                    const map = { 'OF': 'of', 'DCIP': 'dcip', 'MCV': 'mcv', 'MCH': 'mch', 'Hb A': 'hba', 'A₂': 'hba2', 'Hb F': 'hbf', 'Hb Cs': 'hbcs', 'Hb Bart': 'hbbart', 'Hb H': 'hbh' };
-                    return map[item] || item.toLowerCase().replace(/\s+/g, '');
-                },
-
                 getLabTotal(lab) {
                     const e = lab.hbeLogic === 'combined' ? (parseFloat(lab.hba2e) || 0) : (parseFloat(lab.hbe_sep) || 0);
                     return ((parseFloat(lab.hba) || 0) + (parseFloat(lab.hba2) || 0) + (parseFloat(lab.hbf) || 0) + (parseFloat(lab.hbcs) || 0) + (parseFloat(lab.hbbart) || 0) + (parseFloat(lab.hbh) || 0) + e).toFixed(1);
@@ -228,19 +437,46 @@
 
                 get quickRiskResult() {
                     try {
-                        if (!this.quickCalc.wifeVal || !this.quickCalc.husbandVal) return null;
-                        
-                        const w = this.dnaLookup.find(o => o.id === parseFloat(this.quickCalc.wifeVal));
-                        const h = this.dnaLookup.find(o => o.id === parseFloat(this.quickCalc.husbandVal));
-                        if (!w || !h) return null;
+                        let riskBarts = 0;
+                        let riskHomoBeta = 0;
+                        let riskBetaE = 0;
 
-                        // Tab 2: ใช้กฎ 3 ข้อ (Rule 1, 2, 3) 
-                        const riskBarts = h.has_Alpha1 && w.has_Alpha1; // Rule 1
-                        const riskHomoBeta = h.has_Beta && w.has_Beta; // Rule 2
-                        const riskBetaE = (h.has_Beta && w.has_HbE) || (w.has_Beta && h.has_HbE); // Rule 3
-                        const isAtRisk = riskBarts || riskHomoBeta || riskBetaE;
+                        // Alpha Logic
+                        const isAlpha1 = (id) => this.alphaMutations.find(m => m.id === id)?.type === 'Alpha thal-1';
+                        const wHasAlpha1 = isAlpha1(this.dnaData.wife.alpha1) || isAlpha1(this.dnaData.wife.alpha2);
+                        const hHasAlpha1 = isAlpha1(this.dnaData.husband.alpha1) || isAlpha1(this.dnaData.husband.alpha2);
+                        if (wHasAlpha1 && hHasAlpha1) {
+                            riskBarts = 25; // 25% ตามกฎของเมนเดล
+                        }
 
-                        return { w, h, riskBarts, riskHomoBeta, riskBetaE, isAtRisk };
+                        // Beta Logic (Punnett Square)
+                        const getBetaClass = (id) => this.betaMutations.find(m => m.id === id)?.alleleClass || 'Normal';
+                        const wB = [getBetaClass(this.dnaData.wife.beta1), getBetaClass(this.dnaData.wife.beta2)];
+                        const hB = [getBetaClass(this.dnaData.husband.beta1), getBetaClass(this.dnaData.husband.beta2)];
+
+                        const combinations = [
+                            [wB[0], hB[0]],
+                            [wB[0], hB[1]],
+                            [wB[1], hB[0]],
+                            [wB[1], hB[1]]
+                        ];
+
+                        combinations.forEach(pair => {
+                            const hasSevere1 = pair[0] === 'Severe';
+                            const hasSevere2 = pair[1] === 'Severe';
+                            const hasE1 = pair[0] === 'E';
+                            const hasE2 = pair[1] === 'E';
+
+                            if (hasSevere1 && hasSevere2) {
+                                riskHomoBeta += 25;
+                            } else if ((hasSevere1 && hasE2) || (hasSevere2 && hasE1)) {
+                                riskBetaE += 25;
+                            }
+                        });
+
+                        const isAtRisk = riskBarts > 0 || riskHomoBeta > 0 || riskBetaE > 0;
+
+                        return { riskBarts, riskHomoBeta, riskBetaE, isAtRisk };
                     } catch (e) {
                         return null;
                     }
@@ -252,12 +488,37 @@
                         const h = this.interpretHbTyping('husband');
                         if (!w || !h || (w.baseId && !w.has_Beta && w.name.includes('กรุณาระบุ')) || (h.baseId && !h.has_Beta && h.name.includes('กรุณาระบุ'))) return null; 
                         
-                        // Tab 1: เรียกใช้ Logic Matrix แทนการเช็คยีนชนยีนแบบเดิม
                         const riskObj = this.getRiskFromMatrix(w.id, h.id);
                         return { w, h, ...riskObj };
                     } catch(e) {
                         return null;
                     }
+                },
+                
+                get labDnaRecommendations() {
+                    const r = this.liveLabRiskResult;
+                    if (!r) return { alpha: '', beta: '' };
+
+                    let alphaRec = r.riskBarts
+                        ? "แนะนำให้เจาะเลือดตรวจ Alpha-thal 1 DNA ทั้งสามีและภรรยา"
+                        : "ไม่ต้องตรวจ Alpha-thal 1 DNA";
+
+                    let betaRec = "ไม่ต้องตรวจ Beta-mutation DNA";
+                    if (r.riskHomoBeta || r.riskBetaE) {
+                        const wUnknown = r.w.isBetaUnknown;
+                        const hUnknown = r.h.isBetaUnknown;
+
+                        if (hUnknown && wUnknown) {
+                            betaRec = "แนะนำให้เจาะเลือดตรวจ Beta-mutation DNA ทั้งสามีและภรรยา";
+                        } else if (hUnknown && !wUnknown) {
+                            betaRec = "แนะนำให้เจาะเลือดตรวจ Beta-mutation DNA เฉพาะสามี";
+                        } else if (!hUnknown && wUnknown) {
+                            betaRec = "แนะนำให้เจาะเลือดตรวจ Beta-mutation DNA เฉพาะภรรยา";
+                        } else {
+                            betaRec = "แนะนำให้เจาะเลือดตรวจ Beta-mutation DNA ทั้งสามีและภรรยา";
+                        }
+                    }
+                    return { alpha: alphaRec, beta: betaRec };
                 },
 
                 evaluateTyping(lab, p) {
@@ -326,11 +587,8 @@
                         const hasA = b.A;
 
                         const rules = [
-                            // Rule 1 ใช้ค่าปกติทั้งหมดเพื่อระบุว่าเป็น Normal
                             { id: 1, a2: 'le_3.5', e: 'na', f: 'na', of: 'negative', dcip: 'negative', mcv: 'ge_80', mch: 'ge_27', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
-                            // Rule 2 จะดักจับกรณีที่ A2 <= 3.5 แต่มีค่า screening ตัวใดตัวหนึ่งผิดปกติ (ทำหน้าที่แยก 1 กับ 2)
                             { id: 2, a2: 'le_3.5', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
-                            // ตั้งแต่ Rule 3 เป็นต้นไป จะไม่สนใจ OF, DCIP, MCV, MCH อีกต่อไป (ตั้งค่าเป็น 'any')
                             { id: 3, a2: '3.6_to_8.0', e: 'na', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
                             { id: 4, a2: 'na', e: 'ge_25', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
                             { id: 5, a2: 'na', e: 'lt_25', f: 'na', of: 'any', dcip: 'any', mcv: 'any', mch: 'any', age: 'any', h: 'absent', barts: 'absent', cs: 'absent' },
@@ -402,8 +660,8 @@
                     }
                     
                     if (r) {
-                        this.result.wife = { name: r.w.name, interpretation: r.w.interpretation || '-', type: r.w.type || '-' };
-                        this.result.husband = { name: r.h.name, interpretation: r.h.interpretation || '-', type: r.h.type || '-' };
+                        this.result.wife = { name: r.w?.name || '-', interpretation: r.w?.interpretation || '-', type: r.w?.type || '-' };
+                        this.result.husband = { name: r.h?.name || '-', interpretation: r.h?.interpretation || '-', type: r.h?.type || '-' };
                         this.result.riskText = r.isAtRisk ? 'At Risk' : 'No Risk';
                         this.result.dnaAlpha = r.riskBarts;
                         this.result.dnaBeta = r.riskHomoBeta || r.riskBetaE;
@@ -464,7 +722,7 @@
                     const needsAlpha = r.riskBarts;
                     const needsBeta = r.riskHomoBeta || r.riskBetaE;
                     const needsDNA = needsAlpha || needsBeta;
-
+                    
                     const docDefinition = {
                         pageSize: 'A4', pageMargins: [30, 20, 30, 20], defaultStyle: { font: 'Sarabun', fontSize: 11 },
                         content: [
@@ -499,8 +757,9 @@
                                 { width: '53%', table: { widths: ['34%', '33%', '33%'], body: this.buildLabTable(r) } }
                             ] },
                             
-                            {
-                                margin: [0, 15, 0, 15],
+                            // Summary Section conditionally rendered based on flowType
+                            ...(this.flowType === 'lab' ? [{
+                                margin: [0, 15, 0, 10],
                                 table: {
                                     widths: ['*'],
                                     body: [
@@ -510,30 +769,58 @@
                                                 padding: [0, 10, 0, 10],
                                                 stack: [
                                                     { text: 'สรุปผลและคำแนะนำ', bold: true, fontSize: 13, margin: [0, 0, 0, 8] },
-                                                    { 
-                                                        columns: [
-                                                            { width: 10, text: '' },
-                                                            { 
-                                                                width: '*', 
-                                                                stack: [
-                                                                    { text: `- ความเสี่ยงของทารกในครรภ์ : ${r.isAtRisk ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'}`, margin: [0, 0, 0, 4] },
-                                                                    { text: `- การส่งตรวจยืนยัน ระดับ DNA : ${needsDNA ? '' : 'ไม่ต้องส่งตรวจเพิ่มเติม'}`, margin: [0, 2, 0, 2] },
-                                                                    ...(needsDNA ? [
-                                                                        { text: [ chkIcon(needsAlpha), {text: ' Alpha thalassemia 1'} ], margin: [15, 2, 0, 2] },
-                                                                        { text: [ chkIcon(needsBeta), {text: ' Beta mutation'} ], margin: [15, 2, 0, 2] }
-                                                                    ] : [])
-                                                                ]
-                                                            }
-                                                        ]
-                                                    }
+                                                    { text: `- ความเสี่ยงของทารกในครรภ์ : ${r.isAtRisk ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'}`, margin: [15, 0, 0, 4] },
+                                                    { text: `- การส่งตรวจยืนยัน ระดับ DNA :`, margin: [15, 2, 0, 2] },
+                                                    { text: `• ${this.labDnaRecommendations.alpha}`, margin: [30, 2, 0, 2] },
+                                                    { text: `• ${this.labDnaRecommendations.beta}`, margin: [30, 2, 0, 2] }
                                                 ]
                                             }
                                         ]
                                     ]
                                 }
-                            },
+                            }] : []),
                             
-                            { columns: [ { width: '50%', text: '' }, { width: '50%', stack: [ { text: 'ลงนาม ............................... แพทย์/พยาบาลผู้ให้คำปรึกษา' }, { text: `( ${this.result.consultant || '...............................'} )`, margin: [25, 5, 0, 0] } ] } ], margin: [0, 0, 0, 15] },
+                            ...(this.flowType === 'quick' ? [
+                                { text: 'โรคที่เป็นความเสี่ยงของบุตร:', bold: true, margin: [0, 15, 0, 5] },
+                                ...(r.isAtRisk ? [
+                                    {
+                                        ul: [
+                                            ...(r.riskBarts > 0 ? [`Hb Bart's Hydrops Fetalis (${r.riskBarts}%)`] : []),
+                                            ...(r.riskHomoBeta > 0 ? [`Homozygous Beta-thalassemia (${r.riskHomoBeta}%)`] : []),
+                                            ...(r.riskBetaE > 0 ? [`Beta-thalassemia / Hb E (${r.riskBetaE}%)`] : [])
+                                        ],
+                                        margin: [15, 0, 0, 10]
+                                    },
+                                    { text: 'คำแนะนำการวินิจฉัยก่อนคลอด:', bold: true, margin: [0, 5, 0, 5] },
+                                    { text: `แนะนำทำ Prenatal Diagnosis โดยวิธี ${this.formData.pregnancy.pnd_method || '-'}`, margin: [15, 0, 0, 15], color: 'blue' }
+                                ] : [
+                                    { ul: ['ไม่พบความเสี่ยงโรคธาลัสซีเมียชนิดรุนแรง'], margin: [15, 0, 0, 15], color: 'green' }
+                                ])
+                            ] : []),
+
+                            // บรรทัดลายเซ็นรูปแบบใหม่
+                            {
+                                columns: [
+                                    { width: '*', text: '' }, // Spacer
+                                    {
+                                        width: 250,
+                                        stack: [
+                                            {
+                                                columns: [
+                                                    { width: 'auto', text: 'ลงนาม', margin: [0, (this.signatureData ? 15 : 0), 5, 0] },
+                                                    this.signatureData
+                                                        ? { image: this.signatureData, width: 100 }
+                                                        : { text: '...........................................................', margin: [0, 0, 0, 0] }
+                                                ],
+                                                alignment: 'center'
+                                            },
+                                            { text: `( ${this.result.consultantName || '..............................................'} )`, alignment: 'center', margin: [0, 5, 0, 0] },
+                                            { text: 'แพทย์/พยาบาลผู้ให้คำปรึกษา', alignment: 'center', margin: [0, 2, 0, 0] }
+                                        ]
+                                    }
+                                ],
+                                margin: [0, 30, 0, 15]
+                            },
                             { text: `นัดหมาย\tวันที่ ${fmtApptDate} \tอายุครรภ์ ....${fmt(this.formData.appointment.ga_weeks)}.... สัปดาห์ ....${fmt(this.formData.appointment.ga_days)}.... วัน\nหมายเหตุ ....${this.formData.appointment.remark || '....................................................................................................................'}....` }
                         ]
                     };
@@ -563,32 +850,21 @@
                             [{text:[{text:'Hb A'},{text:'2', fontSize:9, sub:true},{text:'+E'}]}, {text:this.labData.wife.hbeLogic==='combined'?fmt(this.labData.wife.hba2e):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='combined'?fmt(this.labData.husband.hba2e):'-', alignment:'center'}],
                             ['Hb E', {text:this.labData.wife.hbeLogic==='separate'?fmt(this.labData.wife.hbe_sep):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='separate'?fmt(this.labData.husband.hbe_sep):'-', alignment:'center'}]
                         );
+                        // Interpretation rows
+                        tbody.push(
+                            ['Hb Typing', {text: r.w ? fmtPdfStr(r.w.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}, {text: r.h ? fmtPdfStr(r.h.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}],
+                            ['Interpretation', {text: `${r.w && r.w.interpretation ? fmtPdfStr(r.w.interpretation) : '-'}\n(${r.w && r.w.type ? fmtPdfStr(r.w.type) : '-'})`, fontSize: 9, alignment: 'center'}, {text: `${r.h && r.h.interpretation ? fmtPdfStr(r.h.interpretation) : '-'}\n(${r.h && r.h.type ? fmtPdfStr(r.h.type) : '-'})`, fontSize: 9, alignment: 'center'}]
+                        );
                     }
 
-                    // Interpretation rows
-                    tbody.push(
-                        ['Hb Typing / DNA', {text: r.w ? fmtPdfStr(r.w.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}, {text: r.h ? fmtPdfStr(r.h.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}],
-                        ['Interpretation', {text: `${r.w && r.w.interpretation ? fmtPdfStr(r.w.interpretation) : '-'}\n(${r.w && r.w.type ? fmtPdfStr(r.w.type) : '-'})`, fontSize: 9, alignment: 'center'}, {text: `${r.h && r.h.interpretation ? fmtPdfStr(r.h.interpretation) : '-'}\n(${r.h && r.h.type ? fmtPdfStr(r.h.type) : '-'})`, fontSize: 9, alignment: 'center'}]
-                    );
-
-                    // แสดงผลความเสี่ยงของลูกเฉพาะหน้า DNA (Quick Flow) เท่านั้น
+                    // แสดงตารางข้อมูล DNA เฉพาะหน้า DNA (Quick Flow)
                     if (this.flowType === 'quick') {
-                        tbody.push([
-                            { text: 'โรคที่เป็นความเสี่ยงของบุตร:', bold: true, colSpan: 3, fillColor: '#f8fafc', border: [true, true, true, false] }, {}, {}
-                        ]);
-                        tbody.push([
-                            { text: '', border: [true, false, false, true] },
-                            { 
-                                colSpan: 2, 
-                                border: [false, false, true, true],
-                                stack: [
-                                    { text: [chkIcon(r.riskBarts), " Hb Bart's Hydrops Fetalis"], margin: [0, 2] },
-                                    { text: [chkIcon(r.riskHomoBeta), " Homozygous Beta-thal"], margin: [0, 2] },
-                                    { text: [chkIcon(r.riskBetaE), " Beta-thal / Hb E"], margin: [0, 2] }
-                                ]
-                            },
-                            {}
-                        ]);
+                        tbody.push(
+                            ['Alpha Thalassemia (Allele 1)', {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.wife.alpha1)?.name), alignment:'center'}, {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.husband.alpha1)?.name), alignment:'center'}],
+                            ['Alpha Thalassemia (Allele 2)', {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.wife.alpha2)?.name), alignment:'center'}, {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.husband.alpha2)?.name), alignment:'center'}],
+                            ['Beta Thalassemia (Allele 1)', {text:fmtPdfStr(this.betaMutations.find(m=>m.id===this.dnaData.wife.beta1)?.name), alignment:'center'}, {text:fmtPdfStr(this.betaMutations.find(m=>m.id===this.dnaData.husband.beta1)?.name), alignment:'center'}],
+                            ['Beta Thalassemia (Allele 2)', {text:fmtPdfStr(this.betaMutations.find(m=>m.id===this.dnaData.wife.beta2)?.name), alignment:'center'}, {text:fmtPdfStr(this.betaMutations.find(m=>m.id===this.dnaData.husband.beta2)?.name), alignment:'center'}]
+                        );
                     }
 
                     return tbody;
@@ -722,7 +998,10 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="input-group !mt-0"><input type="date" x-model="formData.pregnancy.edc" class="input-field" placeholder=" "><label class="input-label">กำหนดคลอด (EDC)</label></div>
+                        <div class="input-group !mt-0">
+                            <input type="date" x-model="formData.pregnancy.edc" @change="updatePregnancyGA()" class="input-field" placeholder=" ">
+                            <label class="input-label">กำหนดคลอด (EDC)</label>
+                        </div>
                         <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.ga_weeks" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์ (สัปดาห์)</label></div>
                         <div class="input-group !mt-0"><input type="number" x-model="formData.pregnancy.ga_days" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์ (วัน)</label></div>
                     </div>
@@ -748,7 +1027,6 @@
                 </div>
                 
                 <div class="flex justify-end pt-4" x-show="currentStep === 1">
-                    <!-- ข้ามไปที่ Step 3 เพื่อโชว์ฟอร์มและ Tab ทันที -->
                     <button @click="goToStep(3, 'lab')" class="flex items-center gap-2 px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md font-semibold transition active:scale-[0.98]">
                         ถัดไป: เลือกรูปแบบการประเมิน <i class="fas fa-arrow-down"></i>
                     </button>
@@ -884,22 +1162,57 @@
                             <div class="bg-white p-6 rounded-2xl border flex flex-col h-full" :class="p === 'wife' ? 'border-pink-200 border-t-4 border-t-pink-500' : 'border-blue-200 border-t-4 border-t-blue-500'">
                                 <div class="flex items-center gap-3 mb-6">
                                     <div class="p-2 rounded-lg" :class="p === 'wife' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'"><i class="fas fa-user-md"></i></div>
-                                    <h3 class="text-lg font-bold text-slate-800" x-text="p === 'wife' ? 'ผลการวินิจฉัยของภรรยา' : 'ผลการวินิจฉัยของสามี'"></h3>
+                                    <h3 class="text-lg font-bold text-slate-800" x-text="p === 'wife' ? 'ผลการวินิจฉัย DNA ของภรรยา' : 'ผลการวินิจฉัย DNA ของสามี'"></h3>
                                 </div>
-                                <select x-model="quickCalc[p + 'Val']" class="input-field !py-3 text-sm font-semibold bg-slate-50 mb-4 cursor-pointer border-slate-300">
-                                    <option value="">-- กรุณาเลือกผลการวินิจฉัย (DNA) --</option>
-                                    <template x-for="opt in dnaLookup" :key="opt.id">
-                                        <option :value="opt.id" x-text="opt.name"></option>
-                                    </template>
-                                </select>
-                                <div class="mt-auto pt-4">
-                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">ยีนแฝงจากผลการวินิจฉัย</div>
-                                    <div x-show="quickCalc[p + 'Val']" class="flex gap-2 flex-wrap animate-fadeIn">
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_Alpha1 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">α-thal 1</span>
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_Beta ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">β-thal</span>
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded border" :class="dnaLookup.find(o => o.id == quickCalc[p + 'Val'])?.has_HbE ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-50 text-gray-400 border-gray-200'">Hb E</span>
+                                
+                                <div class="space-y-5">
+                                    <!-- Alpha 1 -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Alpha Thalassemia (Allele 1)</label>
+                                        <select x-model="dnaData[p].alpha1" class="input-field !py-2 text-sm border-slate-300">
+                                            <template x-for="mut in alphaMutations" :key="mut.id">
+                                                <option :value="mut.id" x-text="mut.name"></option>
+                                            </template>
+                                        </select>
+                                        <div class="mt-1 text-xs text-blue-600 font-semibold" x-text="'Type: ' + (alphaMutations.find(m => m.id === dnaData[p].alpha1)?.type || '')" x-show="dnaData[p].alpha1 !== 'none'"></div>
+                                    </div>
+                                    
+                                    <!-- Alpha 2 -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Alpha Thalassemia (Allele 2)</label>
+                                        <select x-model="dnaData[p].alpha2" class="input-field !py-2 text-sm border-slate-300">
+                                            <template x-for="mut in alphaMutations" :key="mut.id">
+                                                <option :value="mut.id" x-text="mut.name"></option>
+                                            </template>
+                                        </select>
+                                        <div class="mt-1 text-xs text-blue-600 font-semibold" x-text="'Type: ' + (alphaMutations.find(m => m.id === dnaData[p].alpha2)?.type || '')" x-show="dnaData[p].alpha2 !== 'none'"></div>
+                                    </div>
+                                    
+                                    <hr class="border-slate-200">
+                                    
+                                    <!-- Beta 1 -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Beta Thalassemia (Allele 1)</label>
+                                        <select x-model="dnaData[p].beta1" class="input-field !py-2 text-sm border-slate-300">
+                                            <template x-for="mut in betaMutations" :key="mut.id">
+                                                <option :value="mut.id" x-text="mut.name"></option>
+                                            </template>
+                                        </select>
+                                        <div class="mt-1 text-xs font-semibold" :class="betaMutations.find(m => m.id === dnaData[p].beta1)?.severity.includes('มาก') ? 'text-red-600' : 'text-orange-500'" x-text="'Severity: ' + (betaMutations.find(m => m.id === dnaData[p].beta1)?.severity || '')" x-show="dnaData[p].beta1 !== 'none'"></div>
+                                    </div>
+                                    
+                                    <!-- Beta 2 -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-1">Beta Thalassemia (Allele 2)</label>
+                                        <select x-model="dnaData[p].beta2" class="input-field !py-2 text-sm border-slate-300">
+                                            <template x-for="mut in betaMutations" :key="mut.id">
+                                                <option :value="mut.id" x-text="mut.name"></option>
+                                            </template>
+                                        </select>
+                                        <div class="mt-1 text-xs font-semibold" :class="betaMutations.find(m => m.id === dnaData[p].beta2)?.severity.includes('มาก') ? 'text-red-600' : 'text-orange-500'" x-text="'Severity: ' + (betaMutations.find(m => m.id === dnaData[p].beta2)?.severity || '')" x-show="dnaData[p].beta2 !== 'none'"></div>
                                     </div>
                                 </div>
+                                
                             </div>
                         </template>
                     </div>
@@ -919,16 +1232,17 @@
                                 </div>
                                 
                                 <!-- สรุปการตรวจ DNA ที่ต้องทำ -->
-                                <div class="bg-white/80 p-3 rounded-lg border text-left w-full md:w-auto mt-4 md:mt-0 shadow-sm" :class="liveLabRiskResult?.isAtRisk ? 'border-red-200' : 'border-emerald-200'">
-                                    <h3 class="text-xs font-bold text-slate-700 mb-1"><i class="fas fa-microscope text-blue-500 mr-1"></i> การส่งตรวจยืนยันระดับ DNA:</h3>
-                                    
-                                    <ul x-show="liveLabRiskResult?.riskBarts || liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE" class="text-sm font-semibold text-red-700 space-y-1 ml-5 list-disc">
-                                        <li x-show="liveLabRiskResult?.riskBarts">Alpha thalassemia 1</li>
-                                        <li x-show="liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE">Beta mutation</li>
-                                    </ul>
-                                    
-                                    <div x-show="!(liveLabRiskResult?.riskBarts || liveLabRiskResult?.riskHomoBeta || liveLabRiskResult?.riskBetaE)" class="text-sm font-semibold text-emerald-600 ml-2 mt-1">
-                                        <i class="fas fa-check-circle mr-1"></i> ไม่ต้องส่งตรวจเพิ่มเติม
+                                <div class="bg-white/80 p-4 rounded-lg border text-left w-full md:w-auto mt-4 md:mt-0 shadow-sm" :class="liveLabRiskResult?.isAtRisk ? 'border-red-200' : 'border-emerald-200'">
+                                    <h3 class="text-sm font-bold text-slate-700 mb-2"><i class="fas fa-microscope text-blue-500 mr-1"></i> การส่งตรวจยืนยันระดับ DNA:</h3>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center text-sm font-semibold" :class="labDnaRecommendations.alpha.includes('ไม่ต้อง') ? 'text-emerald-600' : 'text-red-600'">
+                                            <i class="mr-2 fas" :class="labDnaRecommendations.alpha.includes('ไม่ต้อง') ? 'fa-check-circle' : 'fa-flask'"></i>
+                                            <span x-text="labDnaRecommendations.alpha"></span>
+                                        </div>
+                                        <div class="flex items-center text-sm font-semibold" :class="labDnaRecommendations.beta.includes('ไม่ต้อง') ? 'text-emerald-600' : 'text-red-600'">
+                                            <i class="mr-2 fas" :class="labDnaRecommendations.beta.includes('ไม่ต้อง') ? 'fa-check-circle' : 'fa-flask'"></i>
+                                            <span x-text="labDnaRecommendations.beta"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -942,19 +1256,38 @@
                             </div>
                             <div class="p-4 space-y-3">
                                 <!-- Disease 1: Hb Bart's -->
-                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBarts ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
-                                    <span class="font-bold text-sm md:text-base">1. โรค Hb Bart's Hydrops Fetalis</span>
-                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBarts ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBarts > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">โรค Hb Bart's Hydrops Fetalis</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBarts > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskBarts + '%') : '✅ 0%'"></span>
                                 </div>
                                 <!-- Disease 2: Homozygous Beta -->
-                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskHomoBeta ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
-                                    <span class="font-bold text-sm md:text-base">2. โรค Homozygous β-thalassemia</span>
-                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskHomoBeta ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskHomoBeta > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">โรค Homozygous β-thalassemia</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskHomoBeta > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskHomoBeta + '%') : '✅ 0%'"></span>
                                 </div>
                                 <!-- Disease 3: Beta / Hb E -->
-                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBetaE ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
-                                    <span class="font-bold text-sm md:text-base">3. โรค β-thalassemia / Hb E</span>
-                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBetaE ? '⚠️ มีความเสี่ยง' : '✅ ไม่เสี่ยง'"></span>
+                                <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBetaE > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+                                    <span class="font-bold text-sm md:text-base">โรค β-thalassemia / Hb E</span>
+                                    <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBetaE > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskBetaE + '%') : '✅ 0%'"></span>
+                                </div>
+                                
+                                <!-- เพิ่ม PND Recommendation -->
+                                <div x-show="quickRiskResult?.isAtRisk" class="w-full mt-4 pt-4 border-t border-blue-100">
+                                    <h3 class="text-sm font-bold text-blue-800 mb-2"><i class="fas fa-user-md mr-1"></i> คำแนะนำการวินิจฉัยก่อนคลอด (Prenatal Diagnosis):</h3>
+                                    <div class="flex flex-wrap gap-4 text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                                            <input type="radio" x-model="formData.pregnancy.pnd_method" value="CVS" class="text-blue-600 focus:ring-blue-500"> 
+                                            CVS (< 14 สัปดาห์)
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                                            <input type="radio" x-model="formData.pregnancy.pnd_method" value="Amniocentesis" class="text-blue-600 focus:ring-blue-500"> 
+                                            Amniocentesis (14-18 สัปดาห์)
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                                            <input type="radio" x-model="formData.pregnancy.pnd_method" value="Cord blood sampling" class="text-blue-600 focus:ring-blue-500"> 
+                                            Cord blood sampling (18+ สัปดาห์)
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -975,8 +1308,53 @@
                     <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2"><i class="fas fa-calendar-alt text-lg text-slate-500"></i><h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest">ข้อมูลการนัดหมายและการออกรายงาน</h3></div>
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="input-group !mt-0"><input type="text" x-model="result.consultant" class="input-field" placeholder=" "><label class="input-label">ชื่อผู้ให้คำปรึกษา</label></div>
-                            <div class="input-group !mt-0"><input type="date" x-model="formData.appointment.date" class="input-field" placeholder=" "><label class="input-label">วันที่นัดหมายครั้งถัดไป</label></div>
+                            
+                            <!-- Input แบบ Dropdown พิมพ์ได้สำหรับชื่อผู้ให้คำปรึกษา -->
+                            <div class="relative flex-1 !mt-0">
+                                <div class="flex items-center gap-2">
+                                    <div class="input-group flex-1 !mt-0">
+                                        <input type="text" x-model="result.consultantName" @focus="showConsultantDropdown = true" @click.outside="showConsultantDropdown = false" class="input-field" placeholder=" ">
+                                        <label class="input-label">ชื่อผู้ให้คำปรึกษา</label>
+                                    </div>
+                                    <button @click="saveConsultant()" class="px-4 py-3 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 transition" title="บันทึกชื่อไว้ใช้ครั้งหน้า">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                                <!-- Dropdown List -->
+                                <div x-show="showConsultantDropdown && consultants.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    <template x-for="name in consultants" :key="name">
+                                        <div class="flex justify-between items-center px-4 py-2 hover:bg-slate-50 cursor-pointer border-b last:border-b-0">
+                                            <span class="flex-1 font-medium text-slate-700" @click="result.consultantName = name; showConsultantDropdown = false" x-text="name"></span>
+                                            <button @click.stop="deleteConsultant(name)" class="text-red-400 hover:text-red-600 p-1" title="ลบรายชื่อ"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </template>
+                                </div>
+                                
+                                <!-- Canvas E-Signature -->
+                                <div class="mt-2">
+                                    <button @click="initSignaturePad()" type="button" class="text-xs text-blue-600 font-semibold hover:underline">
+                                        <i class="fas fa-signature"></i> เซ็นชื่อผู้ให้คำปรึกษา
+                                    </button>
+                                    <div x-show="showSigPad" class="mt-2 border border-blue-200 rounded-lg bg-blue-50 p-2 relative w-full sm:w-80 shadow-inner">
+                                        <canvas id="inlineSigCanvas" width="300" height="100" class="bg-white border border-slate-200 rounded cursor-crosshair touch-none w-full"></canvas>
+                                        <div class="flex justify-between mt-2">
+                                            <button @click="clearSignature()" type="button" class="text-xs text-slate-500 hover:text-slate-700 font-semibold"><i class="fas fa-eraser"></i> ล้างลายเซ็น</button>
+                                            <button @click="saveSignature()" type="button" class="text-xs bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 font-bold shadow-sm">ตกลง</button>
+                                        </div>
+                                    </div>
+                                    <div x-show="signatureData && !showSigPad" class="mt-2 relative inline-block">
+                                        <div class="border border-slate-200 rounded bg-white p-1">
+                                            <img :src="signatureData" class="h-12 object-contain bg-white px-2">
+                                        </div>
+                                        <button @click="signatureData = null" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="input-group !mt-0">
+                                <input type="date" x-model="formData.appointment.date" @change="updateAppointmentGA()" class="input-field" placeholder=" ">
+                                <label class="input-label">วันที่นัดหมายครั้งถัดไป</label>
+                            </div>
                             <div class="input-group"><input type="number" x-model="formData.appointment.ga_weeks" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์วันนัด (สัปดาห์)</label></div>
                             <div class="input-group"><input type="number" x-model="formData.appointment.ga_days" class="input-field" placeholder=" "><label class="input-label">อายุครรภ์วันนัด (วัน)</label></div>
                         </div>
