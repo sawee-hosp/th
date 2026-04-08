@@ -921,24 +921,92 @@
 
     <div class="main-wrapper">
         
-        <!-- View: Login (Step 0) -->
-        <div x-show="currentStep === 0" class="min-h-screen flex flex-col items-center justify-center p-4">
-            <div class="bg-white/80 backdrop-blur-md p-10 rounded-2xl shadow-xl border border-white w-full max-w-sm text-center">
-                <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg shadow-blue-500/30">
-                    <i class="fas fa-dna text-4xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2 tracking-tight">
-                    <span class="text-red-600 text-3xl">T</span>halassemia Unit<br>
-                    <span class="text-yellow-500 text-3xl">T</span>hammasart<br>University Hospital
-                </h2>
-                <p class="text-sm text-gray-500 mb-8 mt-2">เข้าสู่ระบบเพื่อประเมินความเสี่ยง</p>
-                
-                <div class="input-group"><input type="text" class="input-field" placeholder=" " value="admin"><label class="input-label">ชื่อผู้ใช้งาน</label></div>
-                <div class="input-group mt-4"><input type="password" class="input-field" placeholder=" " value="admin"><label class="input-label">รหัสผ่าน</label></div>
-                
-                <button @click="currentStep = 1" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md shadow-blue-500/20 font-semibold uppercase mt-8 tracking-wider text-sm transition active:scale-[0.98]">เข้าสู่ระบบ</button>
-            </div>
+    <!-- View: Login (Step 0) -->
+    <div x-show="currentStep === 0" class="min-h-screen flex flex-col items-center justify-center p-4">
+      <div class="bg-white/80 backdrop-blur-md p-10 rounded-2xl shadow-xl border border-white w-full max-w-sm text-center">
+        <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg shadow-blue-500/30">
+          <i class="fas fa-dna text-4xl"></i>
         </div>
+    
+        <h2 class="text-2xl font-bold text-gray-800 mb-2 tracking-tight">
+          <span class="text-red-600 text-3xl">T</span>halassemia Unit<br>
+          <span class="text-yellow-500 text-3xl">T</span>hammasart<br>University Hospital
+        </h2>
+        <p class="text-sm text-gray-500 mb-8 mt-2">เข้าสู่ระบบเพื่อประเมินความเสี่ยง</p>
+    
+        <div class="input-group">
+          <input id="loginUsername" type="text" class="input-field" placeholder=" " autocomplete="username">
+          <label class="input-label">ชื่อผู้ใช้งาน</label>
+        </div>
+    
+        <div class="input-group mt-4">
+          <input id="loginPassword" type="password" class="input-field" placeholder=" " autocomplete="current-password">
+          <label class="input-label">รหัสผ่าน</label>
+        </div>
+    
+        <p id="loginError" class="text-red-600 text-sm mt-3 hidden"></p>
+    
+        <button
+          type="button"
+          onclick="handleLogin()"
+          class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition"
+        >
+          เข้าสู่ระบบ
+        </button>
+      </div>
+    </div>
+    
+    <script>
+      async function handleLogin() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorEl = document.getElementById('loginError');
+    
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+    
+        if (!username || !password) {
+          errorEl.textContent = 'กรุณากรอกชื่อผู้ใช้งานและรหัสผ่าน';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+    
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+    
+          const data = await res.json();
+    
+          if (res.ok && data.success) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+    
+            const root = document.querySelector('[x-data]');
+            if (root && root.__x) {
+              root.__x.$data.currentStep = 1;
+            } else {
+              location.reload();
+            }
+          } else {
+            errorEl.textContent = data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+            errorEl.classList.remove('hidden');
+          }
+        } catch (err) {
+          errorEl.textContent = 'ไม่สามารถเชื่อมต่อระบบได้';
+          errorEl.classList.remove('hidden');
+        }
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+        const root = document.querySelector('[x-data]');
+        if (isLoggedIn && root && root.__x) {
+          root.__x.$data.currentStep = 1;
+        }
+      });
+    </script>
 
         <div x-show="currentStep >= 1" class="pb-40">
             <!-- 1. ข้อมูลผู้ป่วย (รวม ญ ช และตั้งครรภ์) -->
