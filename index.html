@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thalassemia Unit, Thammasart University Hospital</title>
     
-    <!-- Favicon DNA -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
     
-    <!-- Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
@@ -77,15 +75,48 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 
-    <!-- App Logic -->
     <script>
         function thalassemiaApp() {
             return {
                 currentStep: 0, 
                 flowType: 'lab', 
+
+                // ==========================================
+                // ระบบ Login เชื่อมต่อกับ Cloudflare Backend
+                // ==========================================
+                loginData: { username: '', password: '' },
+                loginLoading: false,
+
+                async loginToCloudflare() {
+                    if (!this.loginData.username || !this.loginData.password) {
+                        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                        return;
+                    }
+
+                    this.loginLoading = true;
+                    try {
+                        const response = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.loginData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.currentStep = 1; 
+                        } else {
+                            alert(data.message); 
+                        }
+                    } catch (error) {
+                        alert('ไม่สามารถเชื่อมต่อระบบตรวจสอบได้ (อาจจะยังไม่ได้อัปโหลดขึ้น Cloudflare Pages)');
+                    } finally {
+                        this.loginLoading = false;
+                    }
+                },
+                // ==========================================
                 
                 // สำหรับ Tab 1: Hb Typing (Lab Flow)
-                // เพิ่ม isBetaUnknown: False(รู้แน่ชัด) / True(สงสัย/แยกไม่ได้)
                 thalLookup: [
                     { id: 1, name: "1. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal or non clinically significant thalassemia", type: "พาหะ α-thalassemia 2", isBetaUnknown: false },
                     { id: 2, name: "2. A₂A, Hb A₂ ≤ 3.5%", interpretation: "Normal Hb typing, not rule out α-thalassemia", type: "พาหะ α-thalassemia 1, พาหะ α-thal 2 หรือ hom α-thal 2", isBetaUnknown: false },
@@ -126,7 +157,7 @@
                     { id: 'CS', name: 'CS (Constant spring)', type: 'Abnormal alpha' }
                 ],
 
-                // สำหรับ Tab 2: รายชื่อ Beta Mutations พร้อม alleleClass สำหรับ Punnett Square
+                // สำหรับ Tab 2: รายชื่อ Beta Mutations
                 betaMutations: [
                     { id: 'none', name: 'ไม่พบ', severity: 'ปกติ', alleleClass: 'Normal' },
                     { id: 'b_28', name: '-28 (A>G)', severity: 'รุนแรงน้อย (β+)', alleleClass: 'Severe' },
@@ -196,13 +227,11 @@
                     appointment: { date: '', ga_weeks: '', ga_days: '', attendance: '', remark: '', additional_info: '' }
                 },
 
-                // สำหรับ Tab 1
                 labData: {
                     wife: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hbeLogic: 'separate', hba2e: '', hbe_sep: '' },
                     husband: { knowOrder: false, orderType: '', of: 'Unknown', dcip: 'Unknown', hbeLogic: 'separate', mcv: '', mch: '', hba: '', hba2: '', hbf: '', hbcs: '', hbbart: '', hbh: '', hba2e: '', hbe_sep: '' }
                 },
                 
-                // สำหรับ Tab 2
                 dnaData: { 
                     wife: { alpha1: 'none', alpha2: 'none', beta1: 'none', beta2: 'none' }, 
                     husband: { alpha1: 'none', alpha2: 'none', beta1: 'none', beta2: 'none' } 
@@ -314,7 +343,6 @@
                     this.signatureData = null;
                 },
 
-                // ฟังก์ชันคำนวณอายุครรภ์
                 calculateGA(edcDate, targetDate) {
                     if (!edcDate || !targetDate) return { weeks: '', days: '' };
                     const edc = new Date(edcDate);
@@ -323,7 +351,6 @@
                     edc.setHours(0,0,0,0);
                     target.setHours(0,0,0,0);
 
-                    // EDC = 40 weeks = 280 days from conception
                     const diffTime = edc.getTime() - target.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     
@@ -441,24 +468,19 @@
                         let riskHomoBeta = 0;
                         let riskBetaE = 0;
 
-                        // Alpha Logic
                         const isAlpha1 = (id) => this.alphaMutations.find(m => m.id === id)?.type === 'Alpha thal-1';
                         const wHasAlpha1 = isAlpha1(this.dnaData.wife.alpha1) || isAlpha1(this.dnaData.wife.alpha2);
                         const hHasAlpha1 = isAlpha1(this.dnaData.husband.alpha1) || isAlpha1(this.dnaData.husband.alpha2);
                         if (wHasAlpha1 && hHasAlpha1) {
-                            riskBarts = 25; // 25% ตามกฎของเมนเดล
+                            riskBarts = 25;
                         }
 
-                        // Beta Logic (Punnett Square)
                         const getBetaClass = (id) => this.betaMutations.find(m => m.id === id)?.alleleClass || 'Normal';
                         const wB = [getBetaClass(this.dnaData.wife.beta1), getBetaClass(this.dnaData.wife.beta2)];
                         const hB = [getBetaClass(this.dnaData.husband.beta1), getBetaClass(this.dnaData.husband.beta2)];
 
                         const combinations = [
-                            [wB[0], hB[0]],
-                            [wB[0], hB[1]],
-                            [wB[1], hB[0]],
-                            [wB[1], hB[1]]
+                            [wB[0], hB[0]], [wB[0], hB[1]], [wB[1], hB[0]], [wB[1], hB[1]]
                         ];
 
                         combinations.forEach(pair => {
@@ -757,7 +779,6 @@
                                 { width: '53%', table: { widths: ['34%', '33%', '33%'], body: this.buildLabTable(r) } }
                             ] },
                             
-                            // Summary Section conditionally rendered based on flowType
                             ...(this.flowType === 'lab' ? [{
                                 margin: [0, 15, 0, 10],
                                 table: {
@@ -798,10 +819,9 @@
                                 ])
                             ] : []),
 
-                            // บรรทัดลายเซ็นรูปแบบใหม่
                             {
                                 columns: [
-                                    { width: '*', text: '' }, // Spacer
+                                    { width: '*', text: '' },
                                     {
                                         width: 250,
                                         stack: [
@@ -850,14 +870,12 @@
                             [{text:[{text:'Hb A'},{text:'2', fontSize:9, sub:true},{text:'+E'}]}, {text:this.labData.wife.hbeLogic==='combined'?fmt(this.labData.wife.hba2e):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='combined'?fmt(this.labData.husband.hba2e):'-', alignment:'center'}],
                             ['Hb E', {text:this.labData.wife.hbeLogic==='separate'?fmt(this.labData.wife.hbe_sep):'-', alignment:'center'}, {text:this.labData.husband.hbeLogic==='separate'?fmt(this.labData.husband.hbe_sep):'-', alignment:'center'}]
                         );
-                        // Interpretation rows
                         tbody.push(
                             ['Hb Typing', {text: r.w ? fmtPdfStr(r.w.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}, {text: r.h ? fmtPdfStr(r.h.name.replace(/^\d+\.\s*/,'')) : '-', alignment:'center'}],
                             ['Interpretation', {text: `${r.w && r.w.interpretation ? fmtPdfStr(r.w.interpretation) : '-'}\n(${r.w && r.w.type ? fmtPdfStr(r.w.type) : '-'})`, fontSize: 9, alignment: 'center'}, {text: `${r.h && r.h.interpretation ? fmtPdfStr(r.h.interpretation) : '-'}\n(${r.h && r.h.type ? fmtPdfStr(r.h.type) : '-'})`, fontSize: 9, alignment: 'center'}]
                         );
                     }
 
-                    // แสดงตารางข้อมูล DNA เฉพาะหน้า DNA (Quick Flow)
                     if (this.flowType === 'quick') {
                         tbody.push(
                             ['Alpha Thalassemia (Allele 1)', {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.wife.alpha1)?.name), alignment:'center'}, {text:fmtPdfStr(this.alphaMutations.find(m=>m.id===this.dnaData.husband.alpha1)?.name), alignment:'center'}],
@@ -873,13 +891,11 @@
         }
     </script>
 
-    <!-- Essential Alpine script -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body x-data="thalassemiaApp()" x-cloak>
 
-    <!-- App Navbar -->
     <nav x-show="currentStep > 0" class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
         <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center no-print">
             <div class="flex items-center gap-4">
@@ -900,7 +916,6 @@
             </div>
         </div>
 
-        <!-- Progress Stepper -->
         <div class="hidden md:flex justify-center items-center gap-8 text-sm py-3 border-b border-gray-100 bg-slate-50 no-print">
             <div class="flex items-center gap-2 cursor-pointer transition-colors" :class="currentStep >= 1 ? 'step-active' : 'step-inactive'" @click="scrollToStep(1)">
                 <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'">1</span>
@@ -921,7 +936,6 @@
 
     <div class="main-wrapper">
         
-        <!-- View: Login (Step 0) -->
         <div x-show="currentStep === 0" class="min-h-screen flex flex-col items-center justify-center p-4">
             <div class="bg-white/80 backdrop-blur-md p-10 rounded-2xl shadow-xl border border-white w-full max-w-sm text-center">
                 <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg shadow-blue-500/30">
@@ -933,15 +947,23 @@
                 </h2>
                 <p class="text-sm text-gray-500 mb-8 mt-2">เข้าสู่ระบบเพื่อประเมินความเสี่ยง</p>
                 
-                <div class="input-group"><input type="text" class="input-field" placeholder=" " value="admin"><label class="input-label">ชื่อผู้ใช้งาน</label></div>
-                <div class="input-group mt-4"><input type="password" class="input-field" placeholder=" " value="admin"><label class="input-label">รหัสผ่าน</label></div>
+                <div class="input-group">
+                    <input type="text" x-model="loginData.username" class="input-field" placeholder=" ">
+                    <label class="input-label">ชื่อผู้ใช้งาน</label>
+                </div>
+                <div class="input-group mt-4">
+                    <input type="password" x-model="loginData.password" class="input-field" placeholder=" ">
+                    <label class="input-label">รหัสผ่าน</label>
+                </div>
                 
-                <button @click="currentStep = 1" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md shadow-blue-500/20 font-semibold uppercase mt-8 tracking-wider text-sm transition active:scale-[0.98]">เข้าสู่ระบบ</button>
+                <button @click="loginToCloudflare()" :disabled="loginLoading" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md shadow-blue-500/20 font-semibold uppercase mt-8 tracking-wider text-sm transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!loginLoading">เข้าสู่ระบบ</span>
+                    <span x-show="loginLoading"><i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ...</span>
+                </button>
             </div>
         </div>
 
         <div x-show="currentStep >= 1" class="pb-40">
-            <!-- 1. ข้อมูลผู้ป่วย (รวม ญ ช และตั้งครรภ์) -->
             <div id="step1" class="max-w-6xl mx-auto w-full mt-8 p-4 md:p-6 space-y-6 animate-fadeIn">
                 <div class="mb-4">
                     <h1 class="text-2xl font-bold text-gray-800">ข้อมูลผู้ป่วย</h1>
@@ -1033,10 +1055,8 @@
                 </div>
             </div>
 
-            <!-- 2. เลือกรูปแบบการประเมิน แบบ Tab -->
             <div x-show="currentStep >= 2" id="step3_tab_container" class="max-w-6xl mx-auto w-full px-4 md:px-6 pt-6">
                 
-                <!-- Tab Headers -->
                 <div class="flex flex-col sm:flex-row mb-0 relative z-10">
                     <button @click="goToStep(3, 'lab')" 
                             class="px-6 py-4 rounded-t-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 border-t-2 border-x-2 border-b-2 sm:border-b-0 sm:-mb-[2px]" 
@@ -1050,10 +1070,8 @@
                     </button>
                 </div>
 
-                <!-- 3. ฟอร์มกรอกข้อมูล และ การแปลผล (เนื้อหาภายใน Tab) -->
                 <div class="bg-white border-2 border-blue-500 rounded-b-xl rounded-tr-xl p-4 md:p-6 shadow-sm relative z-0" x-show="currentStep >= 3">
                     
-                    <!-- ================== LAB FLOW ================== -->
                     <div x-show="flowType === 'lab'" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
                         <template x-for="p in ['wife', 'husband']" :key="p">
                             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col transition-all h-full">
@@ -1065,7 +1083,6 @@
                                 </div>
 
                                 <div class="p-6 flex-1 space-y-6">
-                                    <!-- ทราบผลการวินิจฉัยแล้ว -->
                                     <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 transition-all">
                                         <label :for="'k_'+p" class="flex items-center gap-3 cursor-pointer">
                                             <input type="checkbox" :id="'k_'+p" x-model="labData[p].knowOrder" class="w-5 h-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500">
@@ -1081,7 +1098,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- ซ่อนการกรอกผล Lab หาก tick ว่าทราบแล้ว -->
                                     <div x-show="!labData[p].knowOrder" class="space-y-6 animate-fadeIn">
                                         <div class="space-y-4">
                                             <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">การตรวจคัดกรอง (Screening Tests)</h4>
@@ -1138,7 +1154,6 @@
                                     </div>
                                 </div>
 
-                                <!-- การแปลผล (Interpreted Type) -->
                                 <div class="bg-slate-800 text-white px-6 py-4 mt-auto">
                                     <div class="flex justify-between items-center">
                                         <div>
@@ -1156,7 +1171,6 @@
                         </template>
                     </div>
 
-                    <!-- ================== QUICK FLOW (DNA / Disease Flow) ================== -->
                     <div x-show="flowType === 'quick'" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
                         <template x-for="p in ['wife', 'husband']" :key="p">
                             <div class="bg-white p-6 rounded-2xl border flex flex-col h-full" :class="p === 'wife' ? 'border-pink-200 border-t-4 border-t-pink-500' : 'border-blue-200 border-t-4 border-t-blue-500'">
@@ -1166,7 +1180,6 @@
                                 </div>
                                 
                                 <div class="space-y-5">
-                                    <!-- Alpha 1 -->
                                     <div>
                                         <label class="block text-sm font-bold text-slate-700 mb-1">Alpha Thalassemia (Allele 1)</label>
                                         <select x-model="dnaData[p].alpha1" class="input-field !py-2 text-sm border-slate-300">
@@ -1177,7 +1190,6 @@
                                         <div class="mt-1 text-xs text-blue-600 font-semibold" x-text="'Type: ' + (alphaMutations.find(m => m.id === dnaData[p].alpha1)?.type || '')" x-show="dnaData[p].alpha1 !== 'none'"></div>
                                     </div>
                                     
-                                    <!-- Alpha 2 -->
                                     <div>
                                         <label class="block text-sm font-bold text-slate-700 mb-1">Alpha Thalassemia (Allele 2)</label>
                                         <select x-model="dnaData[p].alpha2" class="input-field !py-2 text-sm border-slate-300">
@@ -1190,7 +1202,6 @@
                                     
                                     <hr class="border-slate-200">
                                     
-                                    <!-- Beta 1 -->
                                     <div>
                                         <label class="block text-sm font-bold text-slate-700 mb-1">Beta Thalassemia (Allele 1)</label>
                                         <select x-model="dnaData[p].beta1" class="input-field !py-2 text-sm border-slate-300">
@@ -1201,7 +1212,6 @@
                                         <div class="mt-1 text-xs font-semibold" :class="betaMutations.find(m => m.id === dnaData[p].beta1)?.severity.includes('มาก') ? 'text-red-600' : 'text-orange-500'" x-text="'Severity: ' + (betaMutations.find(m => m.id === dnaData[p].beta1)?.severity || '')" x-show="dnaData[p].beta1 !== 'none'"></div>
                                     </div>
                                     
-                                    <!-- Beta 2 -->
                                     <div>
                                         <label class="block text-sm font-bold text-slate-700 mb-1">Beta Thalassemia (Allele 2)</label>
                                         <select x-model="dnaData[p].beta2" class="input-field !py-2 text-sm border-slate-300">
@@ -1217,10 +1227,8 @@
                         </template>
                     </div>
 
-                    <!-- ป้ายสรุปความเสี่ยง Live Risk Summary (โชว์ที่ด้านล่างสุดของฟอร์มเสมอ) -->
                     <div class="mt-8 animate-fadeIn pt-4 border-t border-slate-200">
                         
-                        <!-- === LAB FLOW RISK SUMMARY (แสดงเฉพาะหน้า Hb Typing) === -->
                         <div x-show="flowType === 'lab' && liveLabRiskResult" class="rounded-xl border overflow-hidden" :class="liveLabRiskResult?.isAtRisk ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'">
                             <div class="p-4 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                                 <div class="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-md flex-shrink-0" :class="liveLabRiskResult?.isAtRisk ? 'bg-red-500 shadow-red-500/40' : 'bg-emerald-500 shadow-emerald-500/40'">
@@ -1231,7 +1239,6 @@
                                     <h1 class="text-2xl font-black" :class="liveLabRiskResult?.isAtRisk ? 'text-red-600' : 'text-emerald-600'" x-text="liveLabRiskResult?.isAtRisk ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'"></h1>
                                 </div>
                                 
-                                <!-- สรุปการตรวจ DNA ที่ต้องทำ -->
                                 <div class="bg-white/80 p-4 rounded-lg border text-left w-full md:w-auto mt-4 md:mt-0 shadow-sm" :class="liveLabRiskResult?.isAtRisk ? 'border-red-200' : 'border-emerald-200'">
                                     <h3 class="text-sm font-bold text-slate-700 mb-2"><i class="fas fa-microscope text-blue-500 mr-1"></i> การส่งตรวจยืนยันระดับ DNA:</h3>
                                     <div class="space-y-1">
@@ -1248,30 +1255,25 @@
                             </div>
                         </div>
 
-                        <!-- === QUICK FLOW RISK SUMMARY (แสดงเฉพาะหน้า DNA - โชว์ 3 โรคเท่านั้น) === -->
                         <div x-show="flowType === 'quick' && quickRiskResult" class="rounded-xl border border-blue-200 bg-white overflow-hidden shadow-sm">
                             <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-2">
                                 <i class="fas fa-stethoscope text-blue-500"></i>
                                 <h2 class="text-sm font-bold uppercase tracking-widest text-slate-700">สรุปความเสี่ยงโรคธาลัสซีเมียชนิดรุนแรงของทารกในครรภ์</h2>
                             </div>
                             <div class="p-4 space-y-3">
-                                <!-- Disease 1: Hb Bart's -->
                                 <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBarts > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
                                     <span class="font-bold text-sm md:text-base">โรค Hb Bart's Hydrops Fetalis</span>
                                     <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBarts > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskBarts + '%') : '✅ 0%'"></span>
                                 </div>
-                                <!-- Disease 2: Homozygous Beta -->
                                 <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskHomoBeta > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
                                     <span class="font-bold text-sm md:text-base">โรค Homozygous β-thalassemia</span>
                                     <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskHomoBeta > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskHomoBeta + '%') : '✅ 0%'"></span>
                                 </div>
-                                <!-- Disease 3: Beta / Hb E -->
                                 <div class="flex items-center justify-between p-3 rounded-lg border" :class="quickRiskResult?.riskBetaE > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
                                     <span class="font-bold text-sm md:text-base">โรค β-thalassemia / Hb E</span>
                                     <span class="font-black text-sm md:text-base" x-text="quickRiskResult?.riskBetaE > 0 ? ('⚠️ เสี่ยง ' + quickRiskResult.riskBetaE + '%') : '✅ 0%'"></span>
                                 </div>
                                 
-                                <!-- เพิ่ม PND Recommendation -->
                                 <div x-show="quickRiskResult?.isAtRisk" class="w-full mt-4 pt-4 border-t border-blue-100">
                                     <h3 class="text-sm font-bold text-blue-800 mb-2"><i class="fas fa-user-md mr-1"></i> คำแนะนำการวินิจฉัยก่อนคลอด (Prenatal Diagnosis):</h3>
                                     <div class="flex flex-wrap gap-4 text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
@@ -1302,14 +1304,12 @@
 
             </div>
 
-            <!-- 4. ฟอร์มนัดหมายและออกรายงาน -->
             <div x-show="currentStep >= 4 && result.ready" id="step4_lab" class="max-w-6xl mx-auto w-full px-4 md:px-6 pb-20 animate-fadeIn mt-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2"><i class="fas fa-calendar-alt text-lg text-slate-500"></i><h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest">ข้อมูลการนัดหมายและการออกรายงาน</h3></div>
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             
-                            <!-- Input แบบ Dropdown พิมพ์ได้สำหรับชื่อผู้ให้คำปรึกษา -->
                             <div class="relative flex-1 !mt-0">
                                 <div class="flex items-center gap-2">
                                     <div class="input-group flex-1 !mt-0">
@@ -1320,7 +1320,6 @@
                                         <i class="fas fa-save"></i>
                                     </button>
                                 </div>
-                                <!-- Dropdown List -->
                                 <div x-show="showConsultantDropdown && consultants.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                                     <template x-for="name in consultants" :key="name">
                                         <div class="flex justify-between items-center px-4 py-2 hover:bg-slate-50 cursor-pointer border-b last:border-b-0">
@@ -1330,7 +1329,6 @@
                                     </template>
                                 </div>
                                 
-                                <!-- Canvas E-Signature -->
                                 <div class="mt-2">
                                     <button @click="initSignaturePad()" type="button" class="text-xs text-blue-600 font-semibold hover:underline">
                                         <i class="fas fa-signature"></i> เซ็นชื่อผู้ให้คำปรึกษา
@@ -1379,7 +1377,6 @@
                     </div>
                 </div>
 
-                <!-- Actions Footer -->
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 no-print">
                     <div class="flex gap-3 w-full sm:w-auto">
                         <button @click="location.reload()" class="flex-1 sm:flex-none px-4 py-2.5 text-slate-500 font-semibold text-sm hover:bg-rose-50 hover:text-rose-600 rounded-lg transition flex items-center justify-center gap-2"><i class="fas fa-undo"></i> เริ่มผู้ป่วยใหม่</button>
@@ -1391,7 +1388,6 @@
             </div>
         </div>
 
-        <!-- ข้อสงวนสิทธิ์ Footer (ไม่มีในหน้าพิมพ์) -->
         <footer x-show="currentStep > 0" class="mt-auto py-8 px-4 text-center text-xs text-slate-500 bg-white/50 backdrop-blur-sm border-t border-slate-200 no-print">
             <p class="font-semibold text-slate-700 mb-2 text-sm">จัดทำโดย ศูนย์พัฒนาสู่ความเป็นเลิศการคัดกรองและวินิจฉัยก่อนคลอด โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</p>
             <p class="max-w-3xl mx-auto leading-relaxed">
